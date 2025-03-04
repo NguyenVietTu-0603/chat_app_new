@@ -1,0 +1,70 @@
+{% extends "includes/layouts/a.html" %}
+
+{% block content %}
+<style>
+    .container {
+        width: 50%;
+        margin: 50px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h1 {
+        color: #d9534f;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1.1em;
+        text-decoration: none;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-delete {
+        background: #d9534f;
+    }
+
+    .btn-delete:hover {
+        background: #c9302c;
+    }
+
+    .btn-cancel {
+        background: #5bc0de;
+    }
+
+    .btn-cancel:hover {
+        background: #31b0d5;
+    }
+</style>
+
+<div class="container">
+    <h1>Xác nhận xóa bài viết</h1>
+    <p>Bạn có chắc chắn muốn xóa bài viết <strong>"{{ post.title }}"</strong> không?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="btn-container">
+            <button type="submit" class="btn btn-delete">Xóa</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

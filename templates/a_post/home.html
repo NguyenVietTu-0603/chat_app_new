@@ -1,5 +1,6 @@
 {% extends "includes/layouts/a.html" %}
 {% block content %}
+{% load static %}
 <style>
     /* Reset CSS */
     * {
@@ -150,4 +151,5 @@
         {% endfor %}
     </div>
 </div>
+<img src="{% static 'images\haha.jpg' %}" alt="">
 {% endblock content %}

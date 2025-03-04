@@ -17,10 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from a_post.views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_page, name='home'),
     path('post/create/', post_create_page, name='post-create'),
-    path('post/delete/<uuid:pk>/', post_delete_page, name='post_delete')
+    path('post/delete/<uuid:pk>/', post_delete_page, name='post_delete'),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

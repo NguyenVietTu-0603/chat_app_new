@@ -1,0 +1,51 @@
+{% extends "includes/layouts/a.html" %}
+{% block content %}
+{% load static %}
+
+<div id="profile" class="d-flex flex-column align-items-center">
+    
+    <div class="w-100" style="max-width: 50rem;">
+        <div class="card p-4 shadow">
+            <div class="text-center d-flex flex-column align-items-center">
+                <img class="rounded-circle mb-3" style="width: 9rem; height: 9rem; object-fit: cover;" src="{{ profile.avatar }}" />
+                <div class="text-center">
+                    <h1>{{ profile.name }}</h1>
+                    <div class="text-secondary mb-2">@{{ profile.user.username }}</div>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <img class="me-2" style="height: 24px; opacity: 0.6;" src="https://img.icons8.com/material-outlined/50/000000/marker.png"> 
+                        {% if profile.location %}
+                        {{ profile.location }}
+                        {% else %}
+                        Planet Earth
+                        {% endif %}
+                    </div>
+                    <div class="my-3">
+                        {% if profile.bio %}
+                        {{ profile.bio }}
+                        {% else %}
+                        Professional procrastinator
+                        {% endif %}
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-contents" class="w-100 d-flex flex-column align-items-center mt-4">
+        <div class="row g-4 justify-content-center"
+        {% if posts.count == 1 %} style="max-width: 36rem;"
+        {% elif posts.count == 2 %} style="max-width: 60rem;"
+        {% else %} style="max-width: 80rem;"{% endif %}>
+        
+        {% if posts %}
+            {% for post in posts %}
+            <div class="col-lg-6 col-xl-4">{% include 'a_posts/post.html' %}</div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center mt-4">No posts just yet</div>
+        {% endif %}
+    </div>
+    <a href="{% url 'profile-edit' %}">Edit</a>
+    </div>
+</div>
+{% endblock content %}

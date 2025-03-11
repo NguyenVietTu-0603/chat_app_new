@@ -1,0 +1,48 @@
+{% extends "includes/layouts/a.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-3 text-center">Edit Profile</h1>
+    
+    <div class="text-center">
+        <img id="avatar" class="rounded-circle img-thumbnail mb-3" src="{{ user.profile.avatar }}" width="150" height="150" />
+        <div>
+            <h2 id="realname">{{ user.profile.name }}</h2>
+            <p class="text-muted">@{{ user.username }}</p>
+        </div>
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a class="btn btn-secondary ms-2" href="{{ request.META.HTTP_REFERER }}">Cancel</a>
+    </form>
+    
+    {% comment %} <div class="text-center mt-4">
+        <a class="text-danger text-decoration-none" href="{% url 'profile-delete' %}">Delete Profile</a>
+    </div> {% endcomment %}
+</div>
+
+<script>
+    // This updates the avatar
+    document.querySelector('input[type="file"]').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const image = document.querySelector('#avatar');
+        if (file && file.type.includes('image')) {
+            const url = URL.createObjectURL(file);
+            image.src = url;
+        }
+    });
+
+    // This updates the name
+    document.getElementById('id_realname').addEventListener('input', (event) => {
+        document.getElementById('realname').innerText = event.target.value;
+    });
+</script>
+
+{% endblock %}

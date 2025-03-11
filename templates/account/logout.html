@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sign Out</title>
+    </head>
+    <body>
+        <div>
+            <strong>Menu:</strong>
+            <ul>
+                <li>
+                    <a href="/accounts/email/">Change Email</a>
+                </li>
+                <li>
+                    <a href="/accounts/password/change/">Change Password</a>
+                </li>
+                <li>
+                    <a href="/accounts/3rdparty/">Account Connections</a>
+                </li>
+                <li>
+                    <a href="/accounts/logout/">Sign Out</a>
+                </li>
+            </ul>
+        </div>
+        <h1>Sign Out</h1>
+        <p>Are you sure you want to sign out?</p>
+        <form method="post" action="/accounts/logout/">
+            <input type="hidden" name="csrfmiddlewaretoken" value="NeYe4HSo9PRrDZBrDk2G2OdJAkrljvwwphvwhPgQIqwU3fsmLX8AUojNdp4OsLmz">
+            <button type="submit">Sign Out</button>
+        </form>
+    </body>
+</html>

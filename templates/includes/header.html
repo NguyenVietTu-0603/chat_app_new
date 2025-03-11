@@ -90,12 +90,21 @@
         </div>
 
         <!-- Các icon chức năng -->
+        {% if user.is_authenticated %}
         <div class="header-icons">
             <i class="fa-solid fa-house"></i>
             <i class="fa-solid fa-user-friends"></i>
             <i class="fa-brands fa-rocketchat"></i>
             <i class="fa-solid fa-bell"></i>
             <i class="fa-solid fa-user-circle"></i>
+            <a>{{user.username}}</a>
+            <a href="{% url 'account_logout' %}">Log Out</a>
         </div>
+        {% else %}
+        <div>
+            <a href="{% url 'account_login' %}">Log In</a>
+            <a href="{% url 'account_signup' %}">Sign Up</a>
+        </div>
+        {% endif%}
     </div>
 </header>

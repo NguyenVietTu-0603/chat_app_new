@@ -3,3 +3,5 @@ cap nhat git
     git commit -m "Cập nhật mới"
     git push origin main
 part7 9:50 viết model tải ảnh static
+tai khoan admin username:admin
+                passwork:admin

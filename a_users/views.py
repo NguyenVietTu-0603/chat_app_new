@@ -13,9 +13,12 @@ from django.contrib.auth.models import User
 from .forms import *
 from .forms import *
 
+@login_required
 def profile_page(request):
-    profile = request.user.profile
-    return render(request, 'a_users/profile.html',{'profile' : profile})
+    user = request.user
+    # Kiểm tra nếu user chưa có profile, tạo mới
+    profile, created = Profile.objects.get_or_create(user=user)
+    return render(request, 'a_users/profile.html', {'profile': profile})
 
 @login_required
 def profile_edit_page(request):

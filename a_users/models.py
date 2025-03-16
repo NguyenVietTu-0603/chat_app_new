@@ -19,7 +19,7 @@ class Profile(models.Model):
         try:
             avatar = self.image.url
         except:
-            avatar = static('images/avatar_default.svg')
+            avatar = static('images/avt.jpg')
         return avatar
     
     @property

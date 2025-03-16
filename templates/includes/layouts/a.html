@@ -1,8 +1,46 @@
 {% extends "base.html" %}
 
 {% block layout %}
-    {% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <!-- Thanh bên trái -->
+        <div class="col-md-3">
+            <div class="sidebar p-3">
+                <ul class="list-group">
+                    <a href="{% url 'home' %}" class="list-group-item list-group-item-action">🏠 Home</a>
+                    <a href="#" class="list-group-item list-group-item-action">💬 Chat</a>
+                    <a href="{% url 'post-create' %}" class="list-group-item list-group-item-action">✍️ Create Post</a>
+                    <a href="#" class="list-group-item list-group-item-action">👫 Friends</a>
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">👤 Profile</a>
+                    <a href="{% url 'account_logout' %}" class="list-group-item list-group-item-action text-danger">🚪 Logout</a>
+                </ul>
+            </div>
+        </div>
+
+        {% block content %}
     
-    {% endblock content %}
+        {% endblock content %}
+
+        <!-- Thanh bên phải -->
+        <div class="col-md-3">
+            <div class="friend-list">
+                <h5>Bạn bè đang online</h5>
+                <div class="d-flex align-items-center mb-2">
+                    <img src="https://via.placeholder.com/40" class="me-2">
+                    <span>Nguyễn C</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <img src="https://via.placeholder.com/40" class="me-2">
+                    <span>Lê D</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <img src="https://via.placeholder.com/40" class="me-2">
+                    <span>Phạm E</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock layout %}
 

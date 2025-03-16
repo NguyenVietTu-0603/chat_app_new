@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-widt  h, initial-scale=1.0">
-    <title>Sign In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <style>
@@ -26,6 +26,7 @@
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
     }
     .form-container {
         width: 50%;
@@ -55,16 +56,6 @@
     .btn:hover {
         background: #655e91;
     }
-    .remember-me {
-        
-        display: flex;
-        align-items: center;
-        margin: 10px 0;
-    }
-    .remember-me input {
-        margin-right: 10px;
-        width: 10%;
-    }
     .right {
         width: 50%;
         background: linear-gradient(135deg, #d9d4ff, #191435);
@@ -85,34 +76,26 @@
         background: url('bg.jpg') no-repeat center/cover;
         opacity: 0.2;
     }
-    .logo {
-        width: 50%;
-        padding: 15px;
-    }
 </style>
-
 <body>
     <div class="container">
         <div class="form-container">
-            <h2>Sign In</h2>
-            <p>If you have not created an account yet, then please <a href="/accounts/signup/">sign up</a> first.</p>
-            <form method="post" action="/accounts/login/">
+            <h2>Create an account</h2>
+            <p>Already have an account? Then please <a href="/accounts/login/">sign in</a>.</p>
+            <form method="post" action="/accounts/signup/" onsubmit="return validatePassword()">
                 {% csrf_token %}
-                <input type="text" name="login" placeholder="Username" autocomplete="username" maxlength="150" required>
-                <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
-                <div class="remember-me">
-                    <input type="checkbox" name="remember" id="id_remember">
-                    <label for="id_remember">Remember Me</label>
-                </div>
-                <button type="submit" class="btn">Sign In</button>
+                <input type="text" id="username" name="username" placeholder="Username" required>
+                <input type="email" id="email" name="email" style="display: none;" placeholder="Your Email">
+                <input type="password" id="password" name="password1" placeholder="Password" required>
+                <input type="password" id="confirmPassword" name="password2" placeholder="Confirm Password" required>
+                <button type="submit" class="btn">Sign Up</button>
             </form>
         </div>
         <div class="right">
             <img src="Threads_logo.svg" alt="Chatmaster Logo" class="logo">
-            <h2>Welcome Back!</h2>
-            <p>Sign in to access your account and explore new opportunities.</p>
+            <h2>Join Us Today!</h2>
+            <p>Create an account and start exploring new opportunities.</p>
         </div>
     </div>
 </body>
-
 </html>

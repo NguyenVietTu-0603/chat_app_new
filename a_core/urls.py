@@ -28,7 +28,7 @@ urlpatterns = [
     path('post/create/', post_create_page, name='post-create'),
     path('post/delete/<uuid:pk>/', post_delete_page, name='post_delete'),
     
-    path('profile/', profile_page, name='profile'),
+    path('accounts/profile/', profile_page, name='profile'),
     path('profile/edit', profile_edit_page, name='profile-edit'),
 ]
 

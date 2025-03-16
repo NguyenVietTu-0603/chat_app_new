@@ -54,7 +54,7 @@
 <div class="container">
     <h1>Thêm bài viết mới</h1>
     
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         

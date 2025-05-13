@@ -1,19 +1,7 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
 
-# Cấu hình môi trường ảo
-venv/
-env/
-*.env
 
-# Tệp media (nếu không cần đẩy lên GitHub)
-media/
 
-# Tệp tĩnh được tạo tự động
-staticfiles/
-static/
+
 
 # Tệp tạm thời
 *.log

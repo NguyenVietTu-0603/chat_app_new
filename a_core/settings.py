@@ -150,4 +150,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_HOSTS = [
+    'chatapp.local',
+    'localhost',
+    '127.0.0.1',
+    '.ngrok-free.app',
+    '2799-1-52-39-181.ngrok-free.app'
+]

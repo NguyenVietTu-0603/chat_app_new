@@ -1,0 +1,33 @@
+{% extends "includes/layouts/a.html" %}
+{% block content %}
+{% load static %}
+<h2>Danh sách bạn bè</h2>
+
+{% if friends %}
+    <ul>
+        {% for friend in friends %}
+            <li>
+                <div>
+                    <img src="{{ friend.profile.avatar }}" alt="{{ friend.username }}" width="50" height="50">
+                    <h3>{{ friend.profile.name }}</h3>
+                    <p>
+                        @{{ friend.username }}
+                        {% if friend.profile.location %}
+                            - {{ friend.profile.location }}
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <div>
+                    <a href="{% url 'user_profile' friend.id %}">Xem hồ sơ</a>
+                    <a href="{% url 'unfriend' friend.id %}">Hủy kết bạn</a>
+                    <a href="{% url 'block_user' friend.id %}">Chặn</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Bạn chưa có người bạn nào.</p>
+    <p><a href="{% url 'user_list' %}">Tìm bạn bè</a></p>
+{% endif %}
+{% endblock content %}

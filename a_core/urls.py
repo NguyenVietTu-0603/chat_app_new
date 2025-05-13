@@ -50,7 +50,7 @@ urlpatterns = [
     path('users/user_list/<int:user_id>/', user_profile, name='user_profile'),   
     path('users/search_users', search_users, name='search_users'),   
     path('users/friend_list', friend_list, name='friend_list'),   
-    path('users/pending_requests', pending_requests, name='pending_requests'),   
+    path('users/pending_requests', pending_requests, name='pending_requests'), 
     
 ]
 

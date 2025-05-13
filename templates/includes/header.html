@@ -150,8 +150,8 @@
             <div class="nav-links">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
                 <a href=""><i class="fas fa-bell"></i></a>
-                <a href="{% url 'listroom' %}"><i class="fas fa-comments"></i></a>
-                <a href="#"><i class="fas fa-users"></i></a>
+                <a href="{% url 'listroom_private' %}"><i class="fas fa-comments"></i></a>
+                <a href="{% url 'friend_list' %}"><i class="fas fa-users"></i></a>
             </div>
             {% if user.is_authenticated %}
             <div class="avatar">

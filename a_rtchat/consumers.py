@@ -70,11 +70,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         message = data.get("message", "")
         file_url = ""
         is_image = False
+        is_video = False
 
         sender = self.user
         receiver = await self.get_user(self.other_username)
 
-        if msg_type in ["image", "file"]:
+        if msg_type in ["image", "video", "file"]:
             raw_data = data.get("data", "")
             filename = data.get("filename", "file")
 
@@ -84,23 +85,47 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
                 file_path = f"private_chat_files/{filename}"
                 saved_path = default_storage.save(file_path, decoded_file)
-                file_url = f"/private_chat_files/{filename}"  
+                file_url = f"/private_chat_files/{filename}"
 
-                try:
-                    from PIL import Image
-                    with default_storage.open(saved_path, 'rb') as f:
-                        img = Image.open(f)
-                        img.verify()
-                    is_image = True
-                    msg_type = "image"
-                except Exception:
-                    is_image = False
+                # Xác định loại file
+                if msg_type == "video" or format.startswith("data:video"):
+                    is_video = True
+                    msg_type = "video"
+                elif msg_type == "image" or format.startswith("data:image"):
+                    try:
+                        from PIL import Image
+                        with default_storage.open(saved_path, 'rb') as f:
+                            img = Image.open(f)
+                            img.verify()
+                        is_image = True
+                        msg_type = "image"
+                    except Exception:
+                        is_image = False
+                        msg_type = "file"
+                else:
                     msg_type = "file"
 
         if receiver:
             chat = await self.get_or_create_private_chat(sender, receiver)
 
-            new_message = await self.save_message(chat, sender, message, file_url if msg_type != "text" else None, is_image)
+            # Tạo body tin nhắn dựa trên loại file
+            message_body = message
+            if not message and msg_type != "text":
+                if msg_type == "image":
+                    message_body = "[Hình ảnh]"
+                elif msg_type == "video":
+                    message_body = "[Video]"
+                elif msg_type == "file":
+                    message_body = f"[Tệp: {filename}]"
+
+            new_message = await self.save_message(
+                chat, 
+                sender, 
+                message_body, 
+                file_url if msg_type != "text" else None, 
+                is_image,
+                is_video
+            )
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -108,7 +133,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "username": sender.username,
                     "realname": await sync_to_async(lambda: sender.profile.realname)(),
-                    "message": message,
+                    "message": message_body,
                     "file_url": file_url,
                     "msg_type": msg_type,
                     "filename": data.get("filename", "") if msg_type != "text" else "",
@@ -135,12 +160,13 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         return chat
 
     @staticmethod
-    async def save_message(chat, sender, message, file_url=None, is_image=False):
+    async def save_message(chat, sender, message, file_url=None, is_image=False, is_video=False):
         new_message = await sync_to_async(PrivateMessage.objects.create)(
             chat=chat,
             sender=sender,
             body=message,
             file=file_url if file_url else None,
             is_image=is_image if file_url else False,
+            is_video=is_video if file_url else False,
         )
         return new_message

@@ -42,7 +42,7 @@ def private_chat_room(request, username):
     messages = chat.messages.all().order_by('created')
 
     # Lấy tin nhắn cuối cùng
-    last_message = messages.last()
+    last_message = chat.messages.filter(sender=request.user).order_by('created').last()
 
      # Annotate thời gian tin nhắn gần nhất cho từng cuộc trò chuyện
     chats = PrivateChat.objects.filter(Q(user1=request.user) | Q(user2=request.user)) \

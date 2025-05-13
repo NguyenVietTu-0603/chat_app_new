@@ -137,6 +137,7 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Chặn</button>
                 </form>
+                <button class="btn btn-danger" onclick="window.location.href='{% url 'private_chat_room' profile_user.username  %}'">Nhắn Tin</button>
             {% elif is_pending %}
                 <form action="{% url 'accept_friend_request' profile_user.id %}" method="post" style="display:inline;">
                     {% csrf_token %}

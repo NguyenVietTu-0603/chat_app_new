@@ -126,7 +126,7 @@
                     {% if chat.user1 == request.user %}
                         {{ chat.user2.profile.realname }}
                     {% else %}
-                        {{ chat.user1.username }}
+                        {{ chat.user1.profile.realname }}
                     {% endif %}
                 </div>
             </div>

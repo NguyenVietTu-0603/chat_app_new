@@ -29,7 +29,7 @@
                     {% for chat in users %}
                         {% if chat.user1 == request.user %}
                             {% with chat.user2 as other_user %}
-                                {% with chat.messages.last as last_message %}
+                                {% with chat.messages.first as last_message %}
                                     {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" class="c" style="text-decoration: none;"> {% endcomment %}
                                         <div class="person c">
                                             <div class="box">
@@ -62,7 +62,7 @@
                             {% endwith %}
                         {% else %}
                             {% with chat.user1 as other_user %}
-                                {% with chat.messages.last as last_message %}
+                                {% with chat.messages.first as last_message %}
                                     {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" style="text-decoration: none;"> {% endcomment %}
                                         <div class="person c">
                                             <div class="box">
@@ -200,145 +200,298 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const chatBox = document.querySelector(".messages");
-        const messageInput = document.getElementById("message-input");
-        const sendButton = document.getElementById("send-button");
-        const imageInput = document.getElementById("image-input");
-        const videoInput = document.getElementById("video-input");
-        const fileInput = document.getElementById("file-input");
+document.addEventListener("DOMContentLoaded", function () {
+    const chatBox = document.querySelector(".messages");
+    const messageInput = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+    const imageInput = document.getElementById("image-input");
+    const videoInput = document.getElementById("video-input");
+    const fileInput = document.getElementById("file-input");
 
-        const chatroomName = "{{ request.user.username }}_{{ other_user.username }}";
-        const username = "{{ request.user.username }}";
-        const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-        const socket = new WebSocket(`${protocol}${window.location.host}/ws/private-chat/${chatroomName}/`);
+    // Thêm container cho loading bar
+    const loadingContainer = document.createElement("div");
+    loadingContainer.classList.add("upload-loading-container");
+    loadingContainer.innerHTML = `
+        <div class="upload-loading-wrapper">
+            <div class="upload-loading-status">Đang tải lên...</div>
+            <div class="upload-loading-bar-container">
+                <div class="upload-loading-bar"></div>
+            </div>
+            <div class="upload-loading-percentage">0%</div>
+        </div>
+    `;
+    document.body.appendChild(loadingContainer);
 
-        function scrollToBottom() {
-            chatBox.scrollTop = chatBox.scrollHeight;
+    // Thêm style cho loading bar
+    const style = document.createElement("style");
+    style.textContent = `
+        .upload-loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
+        .upload-loading-wrapper {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .upload-loading-status {
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .upload-loading-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .upload-loading-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4caf50;
+            transition: width 0.3s ease;
+        }
+        .upload-loading-percentage {
+            text-align: center;
+            font-weight: bold;
+        }
+    `;
+    document.head.appendChild(style);
 
-        socket.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-            const newMessage = document.createElement("div");
-            newMessage.classList.add("clip", data.username === username ? "sent" : "received");
-            
-            let content = "";
+    const chatroomName = "{{ request.user.username }}_{{ other_user.username }}";
+    const username = "{{ request.user.username }}";
+    const otherUsername = "{{ other_user.username }}";
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const socket = new WebSocket(`${protocol}${window.location.host}/ws/private-chat/${chatroomName}/`);
 
-            const type = (data.msg_type || "").toLowerCase().trim();
-            
-            if (type === "image") {
-                let fileUrl = data.file_url;
-                if (!fileUrl.startsWith("/")) {
-                    fileUrl = "/" + fileUrl;
-                }
-                const imageUrl = `/media${data.file_url}`;
-                content = `
-                    <div class="text1">
-                        <img src="${imageUrl}" 
-                            alt="${data.filename}" 
-                            style="max-width: 200px; border-radius: 8px;">
-                    </div>`;
-                } 
-            else if (type === "video") {
-                let fileUrl = data.file_url;
-                if (!fileUrl.startsWith("/")) {
-                    fileUrl = "/" + fileUrl;
-                }
-                const videoUrl = `/media${data.file_url}`;
-                content = `
-                    <div class="text1">
-                        <video controls style="max-width: 250px; border-radius: 8px;">
-                            <source src="${videoUrl}" type="video/mp4">
-                            Trình duyệt của bạn không hỗ trợ video.
-                        </video>
-                    </div>`;
-            } else if (type === "file") {
-                let fileUrl = data.file_url;
-                if (!fileUrl.startsWith("/")) {
-                    fileUrl = "/" + fileUrl;
-                }
-                const imageUrl = `/media${data.file_url}`;
-                content = `
-                    <div class="text">
-                        <a href="${imageUrl}" download="${data.filename}" target="_blank">
-                            ${data.filename}
-                        </a>
-                    </div>`;
-            } else {
-                content = `<div class="text">${data.message}</div>`;
-            }
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function updateLastMessage(username, message, timestamp) {
+        // Tìm người dùng trong danh sách trò chuyện và cập nhật tin nhắn cuối cùng
+        const conversationElements = document.querySelectorAll('.person.c');
         
-            newMessage.innerHTML = content;
-            chatBox.appendChild(newMessage);
-            scrollToBottom();
-        };
-        
-
-        sendButton.onclick = function () {
-            const message = messageInput.value.trim();
-            if (message) {
-                socket.send(JSON.stringify({ message: message, username: username }));
-                messageInput.value = "";
-            }
-        };
-
-        messageInput.addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                sendButton.click();
+        conversationElements.forEach(conversation => {
+            const usernameElement = conversation.querySelector('.username');
+            if (usernameElement && usernameElement.textContent.trim() === username) {
+                // Cập nhật nội dung tin nhắn
+                const messageElement = conversation.querySelector('.content .message, .content .new');
+                if (messageElement) {
+                    messageElement.textContent = message;
+                    
+                    // Nếu người gửi không phải là người dùng hiện tại, đánh dấu là tin nhắn mới
+                    if (otherUsername !== "{{ request.user.username }}") {
+                        messageElement.classList.remove('message');
+                        messageElement.classList.add('new');
+                    }
+                }
+                
+                // Cập nhật thời gian
+                const timeElement = conversation.querySelector('.content .time');
+                if (timeElement) {
+                    const now = timestamp ? new Date(timestamp) : new Date();
+                    const month = now.toLocaleString('en-US', { month: 'short' });
+                    const day = now.getDate();
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    timeElement.textContent = `• ${month} ${day}, ${hours}:${minutes}`;
+                }
+                
+                // Di chuyển cuộc trò chuyện này lên đầu danh sách
+                const conversationsContainer = document.querySelector('.conversations');
+                if (conversationsContainer) {
+                    conversationsContainer.insertBefore(conversation, conversationsContainer.firstChild);
+                }
             }
         });
+    }
 
-        imageInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file && file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    socket.send(JSON.stringify({
-                        type: "image",
-                        username: username,
-                        data: e.target.result,
-                        filename: file.name,
-                    }));
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        const newMessage = document.createElement("div");
+        newMessage.classList.add("clip", data.username === username ? "sent" : "received");
         
-        const videoInput = document.getElementById("video-input");
+        let content = "";
+        let messageText = ""; // Lưu nội dung tin nhắn để cập nhật danh sách
 
-        videoInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file && file.type.startsWith("video/")) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    socket.send(JSON.stringify({
-                        type: "video",
-                        username: username,
-                        data: e.target.result,
-                        filename: file.name,
-                    }));
-                };
-                reader.readAsDataURL(file);
+        const type = (data.msg_type || "").toLowerCase().trim();
+        
+        if (type === "image") {
+            let fileUrl = data.file_url;
+            if (!fileUrl.startsWith("/")) {
+                fileUrl = "/" + fileUrl;
             }
-        });        
-
-        fileInput.addEventListener("change", function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    socket.send(JSON.stringify({
-                        type: "file",
-                        username: username,
-                        data: e.target.result,
-                        filename: file.name,
-                    }));
-                };
-                reader.readAsDataURL(file);
+            const imageUrl = `/media${data.file_url}`;
+            content = `
+                <div class="text1">
+                    <img src="${imageUrl}" 
+                        alt="${data.filename}" 
+                        style="max-width: 200px; border-radius: 8px;">
+                </div>`;
+            messageText = "[Hình ảnh]";
+        } 
+        else if (type === "video") {
+            let fileUrl = data.file_url;
+            if (!fileUrl.startsWith("/")) {
+                fileUrl = "/" + fileUrl;
             }
-        });
-
+            const videoUrl = `/media${data.file_url}`;
+            content = `
+                <div class="text1">
+                    <video controls style="max-width: 250px; border-radius: 8px;">
+                        <source src="${videoUrl}" type="video/mp4">
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                </div>`;
+            messageText = "[Video]";
+        } else if (type === "file") {
+            let fileUrl = data.file_url;
+            if (!fileUrl.startsWith("/")) {
+                fileUrl = "/" + fileUrl;
+            }
+            const fileDownloadUrl = `/media${data.file_url}`;
+            content = `
+                <div class="text">
+                    <a href="${fileDownloadUrl}" download="${data.filename}" target="_blank">
+                        ${data.filename}
+                    </a>
+                </div>`;
+            messageText = `[Tệp: ${data.filename}]`;
+        } else {
+            content = `<div class="text">${data.message}</div>`;
+            messageText = data.message;
+        }
+    
+        newMessage.innerHTML = content;
+        chatBox.appendChild(newMessage);
         scrollToBottom();
+        
+        // Cập nhật tin nhắn cuối cùng trong danh sách trò chuyện
+        const senderUsername = data.username === username ? "{{ other_user.profile.realname }}" : "{{ other_user.profile.realname }}";
+        updateLastMessage(senderUsername, messageText, data.timestamp);
+        
+        // Ẩn loading bar nếu đang hiển thị
+        hideLoading();
+    };
+    
+    function showLoading() {
+        const loadingContainer = document.querySelector(".upload-loading-container");
+        loadingContainer.style.display = "flex";
+    }
+    
+    function hideLoading() {
+        const loadingContainer = document.querySelector(".upload-loading-container");
+        loadingContainer.style.display = "none";
+        
+        // Reset loading bar
+        const loadingBar = document.querySelector(".upload-loading-bar");
+        const loadingPercentage = document.querySelector(".upload-loading-percentage");
+        loadingBar.style.width = "0%";
+        loadingPercentage.textContent = "0%";
+    }
+    
+    function updateLoadingProgress(progress) {
+        const loadingBar = document.querySelector(".upload-loading-bar");
+        const loadingPercentage = document.querySelector(".upload-loading-percentage");
+        const percentValue = Math.round(progress);
+        loadingBar.style.width = `${percentValue}%`;
+        loadingPercentage.textContent = `${percentValue}%`;
+    }
+    
+    sendButton.onclick = function () {
+        const message = messageInput.value.trim();
+        if (message) {
+            socket.send(JSON.stringify({ 
+                message: message, 
+                username: username,
+                timestamp: new Date().toISOString()
+            }));
+            messageInput.value = "";
+        }
+    };
+
+    messageInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            sendButton.click();
+        }
     });
+
+    function uploadFile(input, fileType) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        showLoading();
+        
+        const reader = new FileReader();
+        
+        // Giả lập quá trình tải lên với tiến trình
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 5;
+            if (progress <= 90) {
+                updateLoadingProgress(progress);
+            }
+        }, 100);
+        
+        reader.onload = function (e) {
+            clearInterval(interval);
+            updateLoadingProgress(100);
+            
+            setTimeout(() => {
+                socket.send(JSON.stringify({
+                    type: fileType,
+                    username: username,
+                    data: e.target.result,
+                    filename: file.name,
+                    timestamp: new Date().toISOString()
+                }));
+            }, 500); // Để người dùng có thể thấy 100% trong một khoảng thời gian ngắn
+        };
+        
+        reader.onerror = function() {
+            clearInterval(interval);
+            hideLoading();
+            alert("Đã xảy ra lỗi khi đọc tệp!");
+        };
+        
+        reader.readAsDataURL(file);
+    }
+
+    imageInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file && file.type.startsWith("image/")) {
+            uploadFile(this, "image");
+        }
+    });
+    
+    videoInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file && file.type.startsWith("video/")) {
+            uploadFile(this, "video");
+        }
+    });
+
+    fileInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            uploadFile(this, "file");
+        }
+    });
+
+    scrollToBottom();
+});
 </script>
 {% endblock %}

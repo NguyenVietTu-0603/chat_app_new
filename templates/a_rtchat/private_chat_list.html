@@ -1,0 +1,139 @@
+{% extends "includes/layouts/a.html" %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .containe {
+        max-width: 700px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .containe h2 {
+        font-size: 24px;
+        color: #333333;
+        margin-bottom: 20px;
+    }
+
+    .room {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 10px;
+    }
+
+    .room:hover {
+        background-color: #f9f9f9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .room:last-child {
+        border-bottom: none;
+    }
+
+    .room-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .room-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        border: 2px solid #ddd;
+        transition: border-color 0.3s ease;
+    }
+
+    .room:hover .room-avatar {
+        border-color: #007bff;
+    }
+
+    .room-name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #555555;
+        transition: color 0.3s ease;
+    }
+
+    .room:hover .room-name {
+        color: #007bff;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .join-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .join-btn:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    .join-btn:active {
+        transform: scale(1);
+    }
+
+    .no-rooms {
+        text-align: center;
+        font-size: 16px;
+        color: #888888;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="containe">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{% url 'listroom' %}" class="join-btn">Group Chat</a>
+        <h2>Private Chat</h2>
+    </div>
+    {% for chat in chats %}
+    <a href="{% if chat.user1 == request.user %}
+                 {% url 'private_chat_room' chat.user2.username %}
+             {% else %}
+                 {% url 'private_chat_room' chat.user1.username %}
+             {% endif %}" style="text-decoration: none;">
+        <div class="room">
+            <div class="room-info">
+                <img src="{% if chat.user1 == request.user %}{{ chat.user2.profile.avatar }}{% else %}{{ chat.user1.profile.avatar }}{% endif %}" alt="User Avatar" class="room-avatar">
+                <div class="room-name">
+                    {% if chat.user1 == request.user %}
+                        {{ chat.user2.profile.realname }}
+                    {% else %}
+                        {{ chat.user1.username }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p>Chưa có cuộc trò chuyện nào.</p>
+    {% endfor %}
+</div>
+{% endblock %}

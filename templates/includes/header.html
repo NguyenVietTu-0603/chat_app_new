@@ -1,0 +1,177 @@
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .header {
+            background-color: #233674; /* Changed color to sky blue */
+            color: white;
+            padding: 10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .header .search-bar {
+            flex: 0.3;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .search-bar .InputContainer {
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(to bottom, #ffffff, #6f6f6f);
+            border-radius: 15px;
+            padding: 0 10px;
+        }
+
+        .header .search-bar .input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: none;
+            color: white;
+            padding-left: 10px;
+            font-size: 14px;
+        }
+
+        .header .right-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .header .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .nav-links a i {
+            font-size: 24px;
+        }
+
+        .header .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .header .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header .dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #3A3B3C;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 180px;
+        }
+
+        .header .dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            gap: 10px;
+        }
+
+        .header .dropdown a:hover {
+            background-color: #484a4d;
+        }
+
+        .dropdown.active {
+            display: block;
+        }
+
+        .header .dropdown a i {
+            font-size: 18px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const avatar = document.querySelector('.avatar');
+            const dropdown = document.querySelector('.dropdown');
+
+            avatar.addEventListener('click', function (event) {
+                dropdown.classList.toggle('active');
+                event.stopPropagation();
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!avatar.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    <div class="header">
+        <div class="logo">SocialApp</div>
+        <div class="search-bar">
+            <div class="InputContainer">
+                <input class="input" type="text" placeholder="Tìm kiếm trên SocialApp">
+            </div>
+        </div>
+        <div class="right-section">
+            <div class="nav-links">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
+                <a href=""><i class="fas fa-bell"></i></a>
+                <a href="{% url 'listroom' %}"><i class="fas fa-comments"></i></a>
+                <a href="#"><i class="fas fa-users"></i></a>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="avatar">
+                {% if user.profile.image %}
+                    <img src="{{ user.profile.image.url }}" alt="Avatar">
+                {% else %}
+                    <img src="/static/avt.jpg" alt="Default Avatar"> <!-- Ảnh mặc định -->
+                {% endif %}
+            </div>
+            <div class="dropdown">
+                <a href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                <a href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        {% else %}
+            <div>
+                <a href="{% url 'account_login' %}">Log In</a>
+                <a href="{% url 'account_signup' %}">Sign Up</a>
+            </div>
+        {% endif %}
+        
+        </div>
+    </div>

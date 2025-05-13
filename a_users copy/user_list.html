@@ -1,0 +1,232 @@
+{% extends "includes/layouts/a.html" %}
+{% block content %}
+{% load static %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9fafc;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 26px;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 800px;
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    li div:first-child {
+        display: flex;
+        align-items: center;
+    }
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 20px;
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    li:hover img {
+        border-color: #3498db;
+        transform: scale(1.1);
+    }
+
+    h3 {
+        font-size: 20px;
+        color: #34495e;
+        margin: 0;
+    }
+
+    p {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin: 5px 0 0;
+    }
+
+    div:last-child {
+        align-items: center;
+        gap: 12px;
+    }
+
+    button, a.btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-success {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #27ae60;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    .btn-dark {
+        background-color: #2c3e50;
+        color: white;
+    }
+
+    .btn-dark:hover {
+        background-color: #1a252f;
+    }
+
+    .no-users {
+        text-align: center;
+        font-size: 18px;
+        color: #bdc3c7;
+        margin-top: 30px;
+    }
+
+    .btn-success {
+    background-color: #2ecc71;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-block;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success:active {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
+
+<h2>
+    {% if query %}
+        Kết quả tìm kiếm: "{{ query }}"
+    {% else %}
+        Danh sách người dùng
+    {% endif %}
+</h2>
+
+{% if users %}
+    <ul>
+        {% for user in users %}
+            <li>
+                <div>
+                    <img src="{{ user.profile.avatar }}" alt="{{ user.username }}">
+                    <div>
+                        <h3>{{ user.profile.name }}</h3>
+                        <p>
+                            @{{ user.username }}
+                            {% if user.profile.location %}
+                                - {{ user.profile.location }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="{% url 'user_profile' user.id %}" class="btn btn-primary">Xem hồ sơ</a>
+                    
+                    {% if user.id in friend_ids %}
+                        <span class="btn btn-success">Bạn bè</span>
+                    {% elif user.id in pending_requests %}
+                        <form action="{% url 'accept_friend_request' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Chấp nhận</button>
+                        </form>
+                        <form action="{% url 'decline_friend_request' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Từ chối</button>
+                        </form>
+                    {% elif user.id in sent_requests %}
+                        <form action="{% url 'cancel_friend_request' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">Đã gửi lời mời</button>
+                        </form>
+                    {% elif user.id in blocked %}
+                        <form action="{% url 'unblock_user' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark">Đã chặn</button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'send_friend_request' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Kết bạn</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="no-users">Không tìm thấy người dùng nào.</p>
+{% endif %}
+{% endblock %}

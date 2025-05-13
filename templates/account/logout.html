@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Out</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 400px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px;
+            background: #37344b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            text-align: center;
+            gap: 10px;
+        }
+        .btn:hover {
+            background: #655e91;
+        }
+        .menu {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .menu button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: left;
+            gap: 10px;
+        }
+        .menu button:hover {
+            background: #d6d6d6;
+        }
+        .menu i {
+            color: #37344b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="menu">
+            <strong>Menu:</strong>
+            <button onclick="location.href='/accounts/email/'"><i class="fas fa-envelope"></i> Change Email</button>
+            <button onclick="location.href='/accounts/password/change/'"><i class="fas fa-key"></i> Change Password</button>
+            <button onclick="location.href='/accounts/3rdparty/'"><i class="fas fa-link"></i> Account Connections</button>
+            <button onclick="location.href='/accounts/logout/'"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+        <h1>Sign Out</h1>
+        <p>Are you sure you want to sign out?</p>
+        <form method="post" action="/accounts/logout/">
+            {% csrf_token %}
+            {% comment %} <input type="hidden" name="csrfmiddlewaretoken" value="NeYe4HSo9PRrDZBrDk2G2OdJAkrljvwwphvwhPgQIqwU3fsmLX8AUojNdp4OsLmz"> {% endcomment %}
+            <button type="submit" class="btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </form>
+    </div>
+</body>
+</html>

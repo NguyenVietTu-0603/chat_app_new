@@ -1,0 +1,162 @@
+{% extends "includes/layouts/a.html" %}
+{% block content %}
+{% load static %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fafafa;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        {% comment %} justify-content: center; {% endcomment %}
+    }
+    .home-container {
+        margin: 0px auto;
+        background: white;
+        padding: 20px ;
+        max-width: 600px;
+    }
+    .post {
+        background: white;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #dbdbdb;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #efefef;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #e1306c;
+        object-fit: cover;
+    }
+    .user-name {
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .post-image {
+        width: 100%;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    .post-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        font-size: 22px;
+        color: #262626;
+    }
+    .post-actions div {
+        display: flex;
+        gap: 15px;
+    }
+    .post-actions i {
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    .post-actions i:hover {
+        color: #e1306c;
+    }
+    .post-likes {
+        font-weight: bold;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    .post-caption {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #262626;
+    }
+    .post-caption b {
+        font-weight: bold;
+    }
+    .fas.fa-ellipsis-h {
+        cursor: pointer;
+    }
+    .comment-section {
+        display: none;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    .comment-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #dbdbdb;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+</style>
+<div class="home-container">
+    {% for post in posts %}
+    <div class="post">
+        <div class="post-header">
+            <div class="user-info">
+                <img src="{{ post.author.profile.avatar }}" class="user-avatar" alt="User Avatar">
+                <div class="user-name">{{ post.author.profile.name }}<span style="color: gray;">• 3 giờ</span></div>
+            </div>
+            <i class="fas fa-ellipsis-h"></i>
+        </div>
+        
+        <img src="{{ post.image.url }}" class="post-image" alt="Post Image">
+        
+        <div class="post-actions">
+            <div>
+                <i class="far fa-heart" onclick="toggleLike(this)"></i>
+                <i class="far fa-comment" onclick="toggleComment(this)"></i>
+                <i class="far fa-paper-plane"></i>
+            </div>
+            <i class="far fa-bookmark"></i>
+        </div>
+
+        <div class="post-likes">415.548 lượt thích</div>
+        <div class="post-caption">
+            <b>{{ post.author.profile.name }}</b> {{ post.title }}
+        </div>
+        
+        <div class="comment-section">
+            <input type="text" class="comment-input" placeholder="Viết bình luận...">
+        </div>
+    </div>
+    {% empty %}
+        <p>Không có bài viết nào.</p>
+    {% endfor %}
+</div>
+{% comment %} <div class="col-md-6">
+    <!-- Ô đăng bài -->
+    <div class="feed-card">
+        <a href="{% url 'post-create' %}" class="btn btn-primary mt-2 w-100">Create Post</a>
+    </div>
+
+    {% for post in posts %}
+    <div class="feed-card" style="margin-top:10px; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; background: white; padding: 15px;">
+        <div class="d-flex align-items-center">
+            <img src="{{ post.author.profile.avatar }}" class="rounded-circle img-fluid border" style="width: 50px; height: 50px; object-fit: cover; margin-right:10px">
+            <div>
+                <strong>{{ post.author.profile.name }}</strong>
+                <p class="text-muted m-0">1 giờ trước</p>
+            </div>
+        </div>
+        <p style="margin-top:10px;">{{ post.title }}</p>
+        <img src="{{ post.image.url }}" class="img-fluid rounded w-100" style="object-fit: cover; max-height: 400px;">
+        <!-- <div class="d-flex justify-content-between mt-2">
+            <button class="btn btn-light">👍 Thích</button>
+            <button class="btn btn-light">💬 Bình luận</button>
+            <button class="btn btn-light">🔄 Chia sẻ</button>
+        </div> -->
+    </div>
+    {% empty %}
+        <p>Không có bài viết nào.</p>
+    {% endfor %}
+</div> {% endcomment %}
+{% endblock content %}

@@ -21,6 +21,8 @@ from a_users.views import *
 from a_rtchat.views import *
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -50,6 +52,7 @@ urlpatterns = [
     path('users/search_users', search_users, name='search_users'),   
     path('users/friend_list', friend_list, name='friend_list'),   
     path('users/pending_requests', pending_requests, name='pending_requests'), 
+    path('video-call/', views.video_call_view, name='video_call'), 
     
 ]
 

@@ -3,9 +3,12 @@
 
 {% block content %}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+<link rel='stylesheet'
+    href='https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
 <link rel="stylesheet" type="text/css" href="{% static 'css/boxchat.css' %}">
 
 <div class="case">
@@ -27,78 +30,84 @@
             <div class="conversations">
                 <div class="conversations">
                     {% for chat in users %}
-                        {% if chat.user1 == request.user %}
-                            {% with chat.user2 as other_user %}
-                                {% with chat.messages.last as last_message %}
-                                    {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" class="c" style="text-decoration: none;"> {% endcomment %}
-                                        <div class="person c">
-                                            <div class="box">
-                                                <div class="image">
-                                                    <img src="{{ other_user.profile.avatar }}" width="50px" height="50px" alt="Avatar" />
-                                                </div>
-                                                <div class="online"></div>
-                                            </div>
-                
-                                            <div class="information">
-                                                <div class="username">{{ other_user.profile.realname }}</div>
-                                                <div class="content">
-                                                    {% if last_message %}
-                                                        <div class="{% if not last_message.is_seen and last_message.sender != request.user %}new{% else %}message{% endif %}">
-                                                            {{ last_message.body }}
-                                                        </div>
-                                                        <div class="time">&bull; {{ last_message.created|date:"M d, H:i" }}</div>
-                                                    {% else %}
-                                                        <div class="message">Chưa có tin nhắn nào.</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                
-                                            <div class="status">
-                                                <div class="point"></div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                {% endwith %}
-                            {% endwith %}
-                        {% else %}
-                            {% with chat.user1 as other_user %}
-                                {% with chat.messages.last as last_message %}
-                                    {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" style="text-decoration: none;"> {% endcomment %}
-                                        <div class="person c">
-                                            <div class="box">
-                                                <div class="image">
-                                                    <img src="{{ other_user.profile.avatar }}" width="50px" height="50px" alt="Avatar" />
-                                                </div>
-                                                <div class="online"></div>
-                                            </div>
-                
-                                            <div class="information">
-                                                <div class="username">{{ other_user.profile.realname }}</div>
-                                                <div class="content">
-                                                    {% if last_message %}
-                                                        <div class="{% if not last_message.is_seen and last_message.sender != request.user %}new{% else %}message{% endif %}">
-                                                            {{ last_message.body }}
-                                                        </div>
-                                                        <div class="time">&bull; {{ last_message.created|date:"M d, H:i" }}</div>
-                                                    {% else %}
-                                                        <div class="message">Chưa có tin nhắn nào.</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                
-                                            <div class="status">
-                                                <div class="point"></div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                {% endwith %}
-                            {% endwith %}
-                        {% endif %}
+                    {% if chat.user1 == request.user %}
+                    {% with chat.user2 as other_user %}
+                    {% with chat.messages.last as last_message %}
+                    {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" class="c"
+                        style="text-decoration: none;"> {% endcomment %}
+                        <div class="person c">
+                            <div class="box">
+                                <div class="image">
+                                    <img src="{{ other_user.profile.avatar }}" width="50px" height="50px"
+                                        alt="Avatar" />
+                                </div>
+                                <div class="online"></div>
+                            </div>
+
+                            <div class="information">
+                                <div class="username">{{ other_user.profile.realname }}</div>
+                                <div class="content">
+                                    {% if last_message %}
+                                    <div
+                                        class="{% if not last_message.is_seen and last_message.sender != request.user %}new{% else %}message{% endif %}">
+                                        {{ last_message.body }}
+                                    </div>
+                                    <div class="time">&bull; {{ last_message.created|date:"M d, H:i" }}</div>
+                                    {% else %}
+                                    <div class="message">Chưa có tin nhắn nào.</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="status">
+                                <div class="point"></div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endwith %}
+                    {% endwith %}
+                    {% else %}
+                    {% with chat.user1 as other_user %}
+                    {% with chat.messages.last as last_message %}
+                    {% comment %} <a href="{% url 'private_chat_room' other_user.username %}"
+                        style="text-decoration: none;"> {% endcomment %}
+                        <div class="person c">
+                            <div class="box">
+                                <div class="image">
+                                    <img src="{{ other_user.profile.avatar }}" width="50px" height="50px"
+                                        alt="Avatar" />
+                                </div>
+                                <div class="online"></div>
+                            </div>
+
+                            <div class="information">
+                                <div class="username">{{ other_user.profile.realname }}</div>
+                                <div class="content">
+                                    {% if last_message %}
+                                    <div
+                                        class="{% if not last_message.is_seen and last_message.sender != request.user %}new{% else %}message{% endif %}">
+                                        {{ last_message.body }}
+                                    </div>
+                                    <div class="time">&bull; {{ last_message.created|date:"M d, H:i" }}</div>
+                                    {% else %}
+                                    <div class="message">Chưa có tin nhắn nào.</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="status">
+                                <div class="point"></div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endif %}
                     {% empty %}
-                        <p>Không có cuộc trò chuyện nào.</p>
+                    <p>Không có cuộc trò chuyện nào.</p>
                     {% endfor %}
                 </div>
-                
+
             </div>
         </div>
         <div class="right" id="message-panel">
@@ -118,7 +127,7 @@
                 </div>
 
                 <div class="options">
-                    <button class="video-call">
+                    <button class="video-call" onclick="window.location.href='{% url 'video_call' %}'">
                         <i class="fi fi-rr-video-camera-alt" style="font-size: 30px;"></i>
                     </button>
                     <button class="voice-call">
@@ -134,32 +143,32 @@
                 <div class="tumbler">
                     <div class="messages">
                         {% for message in messages %}
-                            <div class="clip {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                                {% if message.file %}
-                                    {% if message.is_image %}
-                                        <img src="{{ message.file.url }}" alt="image" style="max-width: 200px; border-radius: 8px;">
-                                    {% elif message.is_video %}
-                                        <video controls style="max-width: 300px; border-radius: 8px;">
-                                            <source src="{{ message.file.url }}" type="video/mp4">
-                                            Trình duyệt của bạn không hỗ trợ video.
-                                        </video>
-                                    {% else %}
-                                        <div class="text">
-                                            <a href="{{ message.file.url }}" download="{{ message.filename }}" target="_blank">
-                                                {{ message.filename }}
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                {% elif message.body %}
-                                    <div class="text">
-                                        {{ message.body }}
-                                    </div>
-                                {% endif %}
+                        <div class="clip {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                            {% if message.file %}
+                            {% if message.is_image %}
+                            <img src="{{ message.file.url }}" alt="image" style="max-width: 200px; border-radius: 8px;">
+                            {% elif message.is_video %}
+                            <video controls style="max-width: 300px; border-radius: 8px;">
+                                <source src="{{ message.file.url }}" type="video/mp4">
+                                Trình duyệt của bạn không hỗ trợ video.
+                            </video>
+                            {% else %}
+                            <div class="text">
+                                <a href="{{ message.file.url }}" download="{{ message.filename }}" target="_blank">
+                                    {{ message.filename }}
+                                </a>
                             </div>
+                            {% endif %}
+                            {% elif message.body %}
+                            <div class="text">
+                                {{ message.body }}
+                            </div>
+                            {% endif %}
+                        </div>
                         {% empty %}
-                            <p>Chưa có tin nhắn nào.</p>
+                        <p>Chưa có tin nhắn nào.</p>
                         {% endfor %}
-                                            
+
                     </div>
 
                     <div class="seen">Seen</div>
@@ -172,14 +181,15 @@
                         <i class="fa-regular fa-face-smile" style="font-size: 20px;"></i>
                     </div>
 
-                    <textarea id="message-input" cols="30" rows="1" placeholder="Message..." class="message-input"></textarea>
+                    <textarea id="message-input" cols="30" rows="1" placeholder="Message..."
+                        class="message-input"></textarea>
                     <button id="send-button" class="send-btn send">Send</button>
 
                     <input type="file" id="image-input" accept="image/*" style="display: none;">
                     <label for="image-input" class="picker photo">
                         <i class="fa-regular fa-image" style="font-size: 20px;"></i>
                     </label>
-                    
+
                     <!-- <input type="file" id="video-input" accept="video/*" style="display: none;">
                     <label for="video-input" class="picker video">
                         <i class="fa-solid fa-file-video" style="font-size: 20px;"></i>
@@ -217,15 +227,16 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
+
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
             const newMessage = document.createElement("div");
             newMessage.classList.add("clip", data.username === username ? "sent" : "received");
-            
+
             let content = "";
 
             const type = (data.msg_type || "").toLowerCase().trim();
-            
+
             if (type === "image") {
                 let fileUrl = data.file_url;
                 if (!fileUrl.startsWith("/")) {
@@ -238,7 +249,7 @@
                             alt="${data.filename}" 
                             style="max-width: 200px; border-radius: 8px;">
                     </div>`;
-                } 
+            }
             else if (type === "video") {
                 let fileUrl = data.file_url;
                 if (!fileUrl.startsWith("/")) {
@@ -267,12 +278,12 @@
             } else {
                 content = `<div class="text">${data.message}</div>`;
             }
-        
+
             newMessage.innerHTML = content;
             chatBox.appendChild(newMessage);
             scrollToBottom();
         };
-        
+
 
         sendButton.onclick = function () {
             const message = messageInput.value.trim();
@@ -303,7 +314,7 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+
         // const videoInput = document.getElementById("video-input");
 
         // videoInput.addEventListener("change", function () {
@@ -341,4 +352,5 @@
         scrollToBottom();
     });
 </script>
+<script src="{% static 'js/AgoraRTC_N-4.23.3.js' %}"></script>
 {% endblock %}

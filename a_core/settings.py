@@ -150,7 +150,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://7ebf-1-52-39-181.ngrok-free.app',
+    'https://*.ngrok-free.app'
+]
 ALLOWED_HOSTS = [
     'chatapp.local',
     'localhost',

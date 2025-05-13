@@ -1,0 +1,11 @@
+{% extends "includes/layouts/a.html" %}
+{% block content %}
+{% load static %}
+<div id="video-call-container">
+    <div id="local-stream" class="video-box"></div>
+    <div id="remote-streams" class="video-box"></div>
+    <button id="leave-call" class="btn btn-danger">Rời khỏi cuộc gọi</button>
+</div>
+<script src="{% static 'js/AgoraRTC_N-4.23.3.js' %}"></script> <!-- Liên kết Agora Web SDK -->
+<script src="{% static 'js/video_call.js' %}"></script>
+{% endblock %}

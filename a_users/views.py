@@ -123,11 +123,11 @@ def accept_friend_request(request, user_id):  # Thay đổi tham số từ reque
 
 @login_required
 @require_POST
-def decline_friend_request(request, request_id):
+def decline_friend_request(request, user_id):
     """
     Từ chối lời mời kết bạn
     """
-    friend_request = get_object_or_404(FriendRequest, id=request_id, receiver=request.user, is_active=True)
+    friend_request = get_object_or_404(FriendRequest, id=user_id, receiver=request.user, is_active=True)
     
     # Từ chối lời mời kết bạn
     friend_request.decline()
@@ -142,24 +142,31 @@ def decline_friend_request(request, request_id):
 
 @login_required
 @require_POST
-def cancel_friend_request(request, request_id):
+def cancel_friend_request(request, user_id):
     """
     Hủy lời mời kết bạn đã gửi trước đó
     """
-    friend_request = get_object_or_404(FriendRequest, id=request_id, sender=request.user, is_active=True)
+    user_to_cancel = get_object_or_404(User, id=user_id)
+    
+    friend_request = get_object_or_404(
+        FriendRequest,
+        sender=request.user,
+        receiver=user_to_cancel,
+        is_active=True
+    )
     
     # Hủy lời mời kết bạn
     friend_request.cancel()
     
-    messages.info(request, f"Đã hủy lời mời kết bạn đến {friend_request.receiver.username}.")
+    messages.info(request, f"Đã hủy lời mời kết bạn đến {user_to_cancel.username}.")
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'success', 'message': f"Đã hủy lời mời kết bạn đến {friend_request.receiver.username}."})
+        return JsonResponse({'status': 'success', 'message': f"Đã hủy lời mời kết bạn đến {user_to_cancel.username}."})
     
-    # Redirect to the user's profile page
-    return redirect('user_profile', user_id=friend_request.receiver.id)
+    return redirect('user_profile', user_id=user_id)
 
 
+# khong can vi da bi trung unfriend
 @login_required
 @require_POST
 def remove_friend(request, user_id):
@@ -229,6 +236,29 @@ def block_user(request, user_id):
     
     return redirect('user_profile', user_id=user_id)
 
+@login_required
+@require_POST
+def unfriend(request, user_id):
+    """
+    Xóa bạn bè khỏi danh sách bạn bè
+    """
+    user_to_unfriend = get_object_or_404(User, id=user_id)
+    
+    try:
+        friend_list = FriendList.objects.get(user=user_id)
+        # Kiểm tra xem có phải bạn bè không
+        if user_to_unfriend in friend_list.friends.all():
+            friend_list.unfriend(user_to_unfriend)
+            messages.info(request, f"Đã xóa {user_to_unfriend.username} khỏi danh sách bạn bè.")
+        else:
+            messages.error(request, "Người dùng này không phải là bạn bè của bạn.")
+    except FriendList.DoesNotExist:
+        messages.error(request, "Bạn chưa có danh sách bạn bè.")
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'message': f"Đã xóa {user_to_unfriend.username} khỏi danh sách bạn bè."})
+    
+    return redirect('user_profile', user_id=user_id)
 
 @login_required
 @require_POST

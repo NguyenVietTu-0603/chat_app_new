@@ -34,8 +34,9 @@ urlpatterns = [
     
     path('friends/send/<int:user_id>/', send_friend_request, name='send_friend_request'),
     path('friends/accept/<int:user_id>/', accept_friend_request, name='accept_friend_request'),
-    path('friends/decline/<int:request_id>/', decline_friend_request, name='decline_friend_request'),
-    path('friends/cancel/<int:request_id>/', cancel_friend_request, name='cancel_friend_request'),
+    path('friends/decline/<int:user_id>/', decline_friend_request, name='decline_friend_request'),
+    path('friends/cancel/<int:user_id>/', cancel_friend_request, name='cancel_friend_request'),
+    path('friends/unfriend/<int:user_id>/', unfriend, name='unfriend'),
     path('friends/remove/<int:user_id>/', remove_friend, name='remove_friend'),
     path('users/block/<int:user_id>/', block_user, name='block_user'),
     path('users/unblock/<int:user_id>/', unblock_user, name='unblock_user'),

@@ -20,9 +20,18 @@
                 
                 <div>
                     <a href="{% url 'user_profile' friend.id %}">Xem hồ sơ</a>
-                    <a href="{% url 'unfriend' friend.id %}">Hủy kết bạn</a>
-                    <a href="{% url 'block_user' friend.id %}">Chặn</a>
+
+                    <form action="{% url 'unfriend' friend.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">Hủy kết bạn</button>
+                    </form>
+
+                    <form action="{% url 'block_user' friend.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Chặn</button>
+                    </form>
                 </div>
+
             </li>
         {% endfor %}
     </ul>

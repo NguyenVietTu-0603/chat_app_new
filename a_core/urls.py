@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from a_post.views import *
 from a_users.views import *
+from a_rtchat.views import *
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -30,6 +31,26 @@ urlpatterns = [
     
     path('accounts/profile/', profile_page, name='profile'),
     path('profile/edit', profile_edit_page, name='profile-edit'),
+    
+    path('friends/send/<int:user_id>/', send_friend_request, name='send_friend_request'),
+    path('friends/accept/<int:user_id>/', accept_friend_request, name='accept_friend_request'),
+    path('friends/decline/<int:request_id>/', decline_friend_request, name='decline_friend_request'),
+    path('friends/cancel/<int:request_id>/', cancel_friend_request, name='cancel_friend_request'),
+    path('friends/remove/<int:user_id>/', remove_friend, name='remove_friend'),
+    path('users/block/<int:user_id>/', block_user, name='block_user'),
+    path('users/unblock/<int:user_id>/', unblock_user, name='unblock_user'),
+    
+    path('chatroom/<str:group_name>/', chat_view, name='chatroom'),
+    path('listroom/', list_room_view, name='listroom'),
+    path('listroom-private/', private_chat_list, name='listroom_private'),
+    path('private-chat/<str:username>/', private_chat_room, name='private_chat_room'),
+    
+    path('users/user_list/', user_list, name='user_list'),
+    path('users/user_list/<int:user_id>/', user_profile, name='user_profile'),   
+    path('users/search_users', search_users, name='search_users'),   
+    path('users/friend_list', friend_list, name='friend_list'),   
+    path('users/pending_requests', pending_requests, name='pending_requests'),   
+    
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

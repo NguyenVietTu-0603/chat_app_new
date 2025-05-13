@@ -1,48 +1,59 @@
-{% load static %}
-<header x-data="{ mobilenavOpen: false }" class="md:flex items-center justify-between [&>*]:px-8 bg-gray-800 h-20 text-white sticky top-0 z-40">
-    <div class="flex items-center justify-between h-20">
-        <logo>
-            <a class="flex items-center gap-1" href="/">
-                <img class="w-6 mr-1 -mt-1" src="{% static 'images/fireheart_white.svg' %}"/>
-                <span class="text-lg font-bold">Awesome</span>
-            </a>
-        </logo>
-        <mobileicon class="md:hidden">
-            <a @click="mobilenavOpen = !mobilenavOpen" class="h-12 w-12 flex items-center justify-center cursor-pointer hover:bg-gray-700 rounded-lg">
-                <img x-show="!mobilenavOpen" class="w-6 h-6 select-none" src="https://img.icons8.com/small/64/ffffff/menu.png"/> 
-                <img x-show="mobilenavOpen" x-cloak class="w-6 h-6 select-none" src="https://img.icons8.com/small/64/ffffff/delete-sign.png"/>
-            </a>
-        </mobileicon>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container d-flex justify-content-center my-5">
+        <div id="chat_window" class="card shadow-lg w-100" style="max-width: 600px; height: 45rem;">
+            <div class="card-header bg-dark text-white text-center sticky-top">
+                <span id="online-count" class="pr-1">3</span> online
+            </div>
+            <div id="chat_container" class="card-body overflow-auto d-flex flex-column">
+                <ul id="chat_messages" class="list-unstyled d-flex flex-column gap-2">
+                    <li class="d-flex justify-content-end mb-3">
+                        <div class="bg-success text-white rounded p-3" style="max-width: 75%;">
+                            Hi, how is everybody?
+                        </div>
+                    </li>
+                    <li class="d-flex flex-column">
+                        <div class="d-flex align-items-start">
+                            <a href="">
+                                <img class="rounded-circle me-2" src="https://pbs.twimg.com/profile_images/508601156767997952/fFTdKUf2_400x400.jpeg" width="40" height="40">
+                            </a>
+                            <div class="bg-light p-3 rounded" style="max-width: 75%;">
+                                Not bad, thanks for asking! My day has been quite productive so far. 
+                                I've been diving into fixing some bugs in the codebase, which can be a nightmare sometimes, 
+                                but I got them at the end. It's always satisfying to track down those buggers and make the application 
+                                finally work. How about you? How's your day been?
+                            </div>
+                        </div>
+                        <small class="text-muted ps-5">Bart @bart</small>
+                    </li>
+                    <li class="d-flex flex-column">
+                        <div class="d-flex align-items-start">
+                            <a href="">
+                                <img class="rounded-circle me-2" src="https://cdn.dribbble.com/userupload/12910688/file/original-d33b34f28a79a4b085edec17d83870ba.png" width="40" height="40">
+                            </a>
+                            <div class="bg-light p-3 rounded" style="max-width: 75%;">
+                                Wonderful!
+                            </div>
+                        </div>
+                        <small class="text-muted ps-5">Lilly @lilly</small>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-dark p-2">
+                <form id="chat_message_form" method="POST" class="w-100">
+                    <input type="text" name="message" class="form-control" placeholder="Add message ..." maxlength="150">
+                </form>
+            </div>
+        </div>
     </div>
-    <nav x-show="mobilenavOpen" x-cloak class="md:!block bg-gray-800 h-screen w-screen md:h-auto md:w-auto -mt-20 md:mt-0 absolute md:relative z-[-1]"
-    x-transition:enter="duration-300 ease-out"
-    x-transition:enter-start="opacity-0 -translate-y-96"
-    x-transition:enter-end="opacity-100 translate-y-0">
-        <ul class="flex items-center navitems flex-col md:flex-row gap-8 md:gap-0 justify-center h-full -translate-y-10 md:translate-y-0">
-            {% if user.is_authenticated %}
-            <li><a href="/">Home</a></li>
-            <li><a href="{% url 'post-create' %}">Create Post</a></li>
-            <li x-data="{ dropdownOpen: false }" class="relative">
-                <a @click="dropdownOpen = !dropdownOpen" @click.away="dropdownOpen = false" class="cursor-pointer select-none">
-                    <img class="h-8 w-8 rounded-full object-cover" src="{{ user.profile.avatar }}"/>
-                    {{ user.profile.name }}
-                    <img x-bind:class="dropdownOpen && 'rotate-180 duration-300'" class="w-4" src="https://img.icons8.com/small/32/777777/expand-arrow.png"/>
-                </a>
-                <div x-show="dropdownOpen" x-cloak class="absolute right-0 bg-white text-black shadow rounded-lg w-40 p-2 z-20"
-                x-transition:enter="duration-300 ease-out"
-                x-transition:enter-start="opacity-0 -translate-y-5 scale-90"
-                x-transition:enter-end="opacity-100 translate-y-0 scale-100">
-                    <ul class="hoverlist [&>li>a]:justify-end">
-                        <li><a href="{% url 'profile' %}">My Profile</a></li>
-                        <li><a href="{% url 'profile-edit' %}">Edit Profile</a></li>
-                        <li><a href="{% url 'account_logout' %}">Log Out</a></li>
-                    </ul>
-                </div>
-            </li>
-            {% else %}
-            <li><a href="{% url 'account_login' %}">Log In</a></li>
-            <li><a href="{% url 'account_signup' %}?next={% url 'profile-onboarding' %}">Sign Up</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
+</body>
+</html>

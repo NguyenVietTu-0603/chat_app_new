@@ -1,8 +1,141 @@
 {% extends "includes/layouts/a.html" %}
 {% block content %}
 {% load static %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fafafa;
+        margin: 0;
+        padding: 0;
+    }
+    .profile-container {
+        margin-top: 50px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: auto;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid #ddd;
+        padding: 5px;
+        object-fit: cover;
+    }
+    .profile-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .profile-address {
+        font-size: 16px;
+        color: gray;
+        margin-top: 5px;
+    }
+    .profile-bio {
+        font-size: 14px;
+        color: #555;
+        margin-top: 10px;
+        padding: 0 20px;
+    }
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+    .profile-stats div {
+        font-weight: bold;
+        color: #333;
+    }
+    .edit-profile-btn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        background-color: #0095f6;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .edit-profile-btn:hover {
+        background-color: #0077cc;
+    }
+    .tab-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+    }
+    .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        color: gray;
+        border-bottom: 2px solid transparent;
+        transition: 0.3s;
+    }
+    .tab.active, .tab:hover {
+        color: black;
+        font-weight: bold;
+        border-bottom: 2px solid black;
+    }
+    .content {
+        display: none;
+        margin-top: 20px;
+    }
+    .content.active {
+        display: block;
+    }
+</style>
+<div class="profile-container">
+    <img src="{{ profile.avatar }}" alt="User Avatar" class="profile-avatar">
+    <div class="profile-name">{{ profile.name }}</div>
+    <div class="profile-address">                        
+        {% if profile.location %}
+            {{ profile.location }}
+        {% else %}
+            Planet Earth
+        {% endif %}</div>
+    <div class="profile-bio">
+        {% if profile.bio %}
+            {{ profile.bio }}
+        {% else %}
+            Professional procrastinator
+        {% endif %}
+    </div>
+    
+    
+    <div class="profile-stats">
+        <div><span id="post-count">0</span> bài viết</div>
+        <div><span id="followers">100</span> người theo dõi</div>
+        <div>Đang theo dõi <span id="following">200</span> người</div>
+    </div>
 
-<div id="profile" class="d-flex flex-column align-items-center">
+    <button class="edit-profile-btn" onclick="window.location.href='{% url 'profile-edit' %}'">Chỉnh sửa trang cá nhân</a></button>
+</div>
+
+<div class="tab-container">
+    <div class="tab active" onclick="openTab('posts')">📷 Bài viết</div>
+    <div class="tab" onclick="openTab('saved')">🔖 Đã lưu</div>
+    <div class="tab" onclick="openTab('tagged')">🏷 Được gắn thẻ</div>
+</div>
+
+<div id="posts" class="content active">
+    <p>📷 Hiển thị danh sách bài viết.</p>
+</div>
+<div id="saved" class="content">
+    <p>🔖 Hiển thị danh sách bài đã lưu.</p>
+</div>
+<div id="tagged" class="content">
+    <p>🏷 Hiển thị bài viết được gắn thẻ.</p>
+</div>
+{% comment %} <div id="profile" class="d-flex flex-column align-items-center">
     
     <div class="w-100" style="max-width: 50rem;">
         <div class="card p-4 shadow">
@@ -47,5 +180,5 @@
     </div>
     <a href="{% url 'profile-edit' %}">Edit</a>
     </div>
-</div>
+</div> {% endcomment %}
 {% endblock content %}

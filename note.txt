@@ -1,6 +1,6 @@
 cap nhat git    
     git add .
-    git commit -m "Cập nhật mới"
+    git commit -m "Update chat box, websocket"
     git push origin main
 part7 9:50 viết model tải ảnh static
 tai khoan admin username:admin

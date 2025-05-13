@@ -1,110 +1,177 @@
-<style>
-    /* Reset CSS */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, sans-serif;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-    /* Header */
-    .header {
-        {% comment %} background: #1877f2; {% endcomment %}
-        background: #541919b3;
-        color: white;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: fixed;
-        width: 100%;
-        top: 0;
-        z-index: 1000;
-    }
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
 
-    /* Logo */
-    .logo {
-        font-size: 24px;
-        font-weight: bold;
-    }
+        .header {
+            background-color: #233674; /* Changed color to sky blue */
+            color: white;
+            padding: 10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
 
-    /* Thanh tìm kiếm */
-    .search-box {
-        display: flex;
-        align-items: center;
-        background: white;
-        border-radius: 20px;
-        padding: 5px 10px;
-    }
+        .header .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-    .search-box input {
-        border: none;
-        outline: none;
-        padding: 5px;
-        width: 200px;
-    }
+        .header .search-bar {
+            flex: 0.3;
+            display: flex;
+            align-items: center;
+        }
 
-    .search-box button {
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        color: #541919b3;
-    }
+        .header .search-bar .InputContainer {
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(to bottom, #ffffff, #6f6f6f);
+            border-radius: 15px;
+            padding: 0 10px;
+        }
 
-    /* Icon chức năng */
-    .header-icons {
-        display: flex;
-        gap: 15px;
-    }
+        .header .search-bar .input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: none;
+            color: white;
+            padding-left: 10px;
+            font-size: 14px;
+        }
 
-    .header-icons i {
-        font-size: 20px;
-        cursor: pointer;
-        padding: 10px;
-        border-radius: 50%;
-        transition: background 0.3s;
-        cursor: pointer;
-    }
+        .header .right-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
 
-    .header-icons i:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-    .mg-top{
-        width:100%;
-        height:46px;
-    }
+        .header .nav-links {
+            display: flex;
+            gap: 20px;
+        }
 
-</style>
-<header>
-    <!-- Header -->
-    <div class="mg-top">
-    </div>
+        .header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .nav-links a i {
+            font-size: 24px;
+        }
+
+        .header .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .header .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header .dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #3A3B3C;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 180px;
+        }
+
+        .header .dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            gap: 10px;
+        }
+
+        .header .dropdown a:hover {
+            background-color: #484a4d;
+        }
+
+        .dropdown.active {
+            display: block;
+        }
+
+        .header .dropdown a i {
+            font-size: 18px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const avatar = document.querySelector('.avatar');
+            const dropdown = document.querySelector('.dropdown');
+
+            avatar.addEventListener('click', function (event) {
+                dropdown.classList.toggle('active');
+                event.stopPropagation();
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!avatar.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <div class="header">
-        <!-- Logo -->
-        <div class="logo">Chatapp</div>
-
-        <!-- Thanh tìm kiếm -->
-        <div class="search-box">
-            <input type="text" placeholder="Tìm kiếm...">
-            <button><i class="fa-solid fa-magnifying-glass"></i></button>
+        <div class="logo">SocialApp</div>
+        <div class="search-bar">
+            <div class="InputContainer">
+                <input class="input" type="text" placeholder="Tìm kiếm trên SocialApp">
+            </div>
         </div>
-
-        <!-- Các icon chức năng -->
-        {% if user.is_authenticated %}
-        <div class="header-icons">
-            <i class="fa-solid fa-house"></i>
-            <i class="fa-solid fa-user-friends"></i>
-            <i class="fa-brands fa-rocketchat"></i>
-            <i class="fa-solid fa-bell"></i>
-            <i class="fa-solid fa-user-circle"></i>
-            <a>{{user.username}}</a>
-            <a href="{% url 'account_logout' %}">Log Out</a>
-        </div>
+        <div class="right-section">
+            <div class="nav-links">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
+                <a href=""><i class="fas fa-bell"></i></a>
+                <a href="{% url 'listroom' %}"><i class="fas fa-comments"></i></a>
+                <a href="#"><i class="fas fa-users"></i></a>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="avatar">
+                {% if user.profile.image %}
+                    <img src="{{ user.profile.image.url }}" alt="Avatar">
+                {% else %}
+                    <img src="/static/avt.jpg" alt="Default Avatar"> <!-- Ảnh mặc định -->
+                {% endif %}
+            </div>
+            <div class="dropdown">
+                <a href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a>
+                <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                <a href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
         {% else %}
-        <div>
-            <a href="{% url 'account_login' %}">Log In</a>
-            <a href="{% url 'account_signup' %}">Sign Up</a>
+            <div>
+                <a href="{% url 'account_login' %}">Log In</a>
+                <a href="{% url 'account_signup' %}">Sign Up</a>
+            </div>
+        {% endif %}
+        
         </div>
-        {% endif%}
     </div>
-</header>

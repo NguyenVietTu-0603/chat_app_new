@@ -1,7 +1,140 @@
 {% extends "includes/layouts/a.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<style>
+    /* General container styling */
+    .containe {
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Heading styling */
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+    
+    /* Avatar styling */
+    #avatar {
+        display: block;
+        margin: 0 auto;
+        border-radius: 50%;
+        border: 4px solid #ddd;
+        transition: transform 0.3s ease;
+        object-fit: cover;
+    }
+    
+    #avatar:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Profile name styling */
+    h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    
+    .text-muted {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    /* Form styling */
+    form {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mb-3 {
+        margin-bottom: 15px;
+    }
+    
+    input[type="text"], input[type="email"], textarea, input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    input[type="file"] {
+        width: auto;
+    }
+    
+    #id_image {
+        font-size: 16px;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    /* Tùy chỉnh nút "Chọn tệp" */
+    #id_image::-webkit-file-upload-button {
+        background-color: skyblue;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    /* Hiệu ứng khi di chuột vào */
+    #id_image::-webkit-file-upload-button:hover {
+        background-color: darkblue;
+    }
+    
+    
+    /* Button styling */
+    .btn {
+        padding: 10px 15px;
+        font-size: 1rem;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    /* Delete profile link */
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    .text-danger:hover {
+        text-decoration: underline;
+    }
+    
+</style>
+<div class="containe mt-4">
     <h1 class="mb-3 text-center">Edit Profile</h1>
     
     <div class="text-center">

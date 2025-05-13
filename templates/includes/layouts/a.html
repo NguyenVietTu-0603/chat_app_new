@@ -1,45 +1,193 @@
 {% extends "base.html" %}
 
 {% block layout %}
-<div class="container mt-3">
-    <div class="row">
-        <!-- Thanh bên trái -->
-        <div class="col-md-3">
-            <div class="sidebar p-3">
-                <ul class="list-group">
-                    <a href="{% url 'home' %}" class="list-group-item list-group-item-action">🏠 Home</a>
-                    <a href="#" class="list-group-item list-group-item-action">💬 Chat</a>
-                    <a href="{% url 'post-create' %}" class="list-group-item list-group-item-action">✍️ Create Post</a>
-                    <a href="#" class="list-group-item list-group-item-action">👫 Friends</a>
-                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">👤 Profile</a>
-                    <a href="{% url 'account_logout' %}" class="list-group-item list-group-item-action text-danger">🚪 Logout</a>
-                </ul>
-            </div>
+<style>
+    /* Reset styles */
+    body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        background-color: #f0f2f5;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Container chính */
+    .container {
+        display: flex;
+        margin-top: 20px;
+        flex-grow: 1;
+        padding: 0 20px 20px 20px;
+        gap: 20px;
+        scrollbar-width: thin;
+        scrollbar-color: #b3b3b3 #f0f0f0;
+    }
+
+    .container::-webkit-scrollbar {
+        width: 8px;
+    }
+    .container::-webkit-scrollbar-track {
+        background: #f0f0f0;
+    }
+    .container::-webkit-scrollbar-thumb {
+        background: #b3b3b3;
+        border-radius: 4px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 260px;
+        padding: 0px 20px;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: calc(100vh - 100px); /* Full height trừ header */
+        overflow-y: auto;
+    }
+
+    /* Logo Instagram */
+    .left-sidebar .logo {
+        font-family: 'Pacifico', cursive;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Danh sách Sidebar */
+    .left-sidebar ul,
+    .right-sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Item trong Sidebar */
+    .left-sidebar ul li,
+    .right-sidebar ul li {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: 8px;
+        transition: background 0.2s ease, transform 0.1s ease;
+        cursor: pointer;
+    }
+
+    /* Hover mượt hơn */
+    .left-sidebar ul li:hover,
+    .right-sidebar ul li:hover {
+        background-color: #e4e6eb;
+        transform: scale(1.02);
+    }
+
+    /* Item đang chọn */
+    .left-sidebar ul li.active {
+        background-color: #d8dadf;
+        font-weight: bold;
+    }
+
+    /* Icon FontAwesome */
+    .left-sidebar ul li i,
+    .right-sidebar ul li i {
+        font-size: 20px;
+        margin-right: 14px;
+        color: #4267B2;
+    }
+
+    /* Avatar Sidebar */
+    .left-sidebar ul li img,
+    .right-sidebar ul li img {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        margin-right: 14px;
+    }
+
+    /* Nội dung chính */
+    .main-content {
+        flex-grow: 1;
+        padding: 0px 20px;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: calc(100vh - 100px); /* Full height trừ header */
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #b3b3b3 #f0f0f0;
+    }
+
+    .main-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    .main-content::-webkit-scrollbar-track {
+        background: #f0f0f0;
+    }
+    .main-content::-webkit-scrollbar-thumb {
+        background: #b3b3b3;
+        border-radius: 4px;
+    }
+
+
+    /* Right Sidebar */
+    .right-sidebar h3 {
+        margin-bottom: 15px;
+        font-size: 18px;
+        color: #4267B2;
+    }
+
+    /* Hiển thị bạn bè */
+    .right-sidebar ul li {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+        cursor: pointer;
+    }
+
+    /* Avatar bạn bè */
+    .right-sidebar ul li img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 12px;
+        border: 2px solid #42b72a; /* Màu xanh cho người online */
+    }
+    .left-sidebar ul li.active {
+        background-color: #d8dadf;
+        font-weight: bold;
+    }
+</style>
+<div class="container">
+    <div class="sidebar left-sidebar">
+        <div class="logo">SocialApp</div>
+        <ul>
+            <li class="menu-item active" data-page="home" onclick="window.location.href='{% url 'home' %}'"><i class="fas fa-home"></i> Trang chủ</li>
+            <li class="menu-item" data-page="search" onclick="window.location.href='{% url 'search_users' %}'"><i class="fas fa-search"></i> Tìm kiếm</li>
+            <li class="menu-item" data-page="explore"><i class="fas fa-compass"></i> Khám phá</li>
+            <li class="menu-item" data-page="messages" onclick="window.location.href='{% url 'listroom' %}'"><i class="fas fa-comment-dots"></i> Tin nhắn</li>
+            <li class="menu-item" data-page="notifications"><i class="fas fa-heart"></i> Thông báo</li>
+            <li class="menu-item" data-page="create" onclick="window.location.href='{% url 'post-create' %}'"><i class="fas fa-plus-square"></i> Tạo</li>
+            <li class="menu-item" data-page="profile" onclick="window.location.href='{% url 'profile' %}'"><i class="fas fa-user-circle"></i> Trang cá nhân</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="content-area">
+        {%block content%}
+        
+        {%endblock%}
         </div>
+    </div>
 
-        {% block content %}
-    
-        {% endblock content %}
-
-        <!-- Thanh bên phải -->
-        <div class="col-md-3">
-            <div class="friend-list">
-                <h5>Bạn bè đang online</h5>
-                <div class="d-flex align-items-center mb-2">
-                    <img src="https://via.placeholder.com/40" class="me-2">
-                    <span>Nguyễn C</span>
-                </div>
-                <div class="d-flex align-items-center mb-2">
-                    <img src="https://via.placeholder.com/40" class="me-2">
-                    <span>Lê D</span>
-                </div>
-                <div class="d-flex align-items-center mb-2">
-                    <img src="https://via.placeholder.com/40" class="me-2">
-                    <span>Phạm E</span>
-                </div>
-            </div>
-        </div>
-
+    <div class="sidebar right-sidebar">
+        <h3>Bạn bè đang online</h3>
+        <ul>
+            <li><img src="../friend1.jpg" alt="Friend 1"> Friend 1</li>
+            <li><img src="../friend2.jpg" alt="Friend 2"> Friend 2</li>
+            <li><img src="../friend3.jpg" alt="Friend 3"> Friend 3</li>
+            <li><img src="../friend4.jpg" alt="Friend 4"> Friend 4</li>
+            <li><img src="../friend5.jpg" alt="Friend 5"> Friend 5</li>
+        </ul>
     </div>
 </div>
 {% endblock layout %}

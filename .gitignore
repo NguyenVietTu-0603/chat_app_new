@@ -1,15 +1,36 @@
-# Ignore Python bytecode
-# Ignore Python bytecode
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignore virtual environment
+# Cấu hình môi trường ảo
 venv/
+env/
+*.env
 
+# Tệp media (nếu không cần đẩy lên GitHub)
 media/
 
-# Ignore system files
+# Tệp tĩnh được tạo tự động
+staticfiles/
+static/
+
+# Tệp tạm thời
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Tệp hệ thống
 .DS_Store
 Thumbs.db
 
-# Ignore temporary files
-*.log
-*.tmp
+# Tệp liên quan đến IDE
+.vscode/
+.idea/
+*.iml
+
+# Tệp liên quan đến Git
+.git/
+.gitattributes

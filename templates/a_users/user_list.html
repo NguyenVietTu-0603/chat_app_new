@@ -5,7 +5,6 @@
 
 <style>
     body {
-        font-family: 'Poppins', sans-serif;
         background-color: #f9fafc;
         margin: 0;
         padding: 0;
@@ -165,7 +164,87 @@
     transform: scale(1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+    .search-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto 30px;
+        padding: 0 15px;
+    }
+    
+    .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input-wrapper:focus-within {
+        box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.3);
+        border-color: #4e73df;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        background: transparent;
+    }
+    
+    .search-button {
+        background: #4e73df;
+        color: white;
+        border: none;
+        width: 50px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .search-button i {
+        font-size: 18px;
+    }
+    
+    .search-button:hover {
+        background: #2e59d9;
+    }
+    
+    @media (max-width: 768px) {
+        .search-container {
+            max-width: 100%;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        
+        .search-button {
+            width: 45px;
+            height: 41px;
+        }
+    }
 </style>
+
+<div class="search-container">
+    <form action="{% url 'search_users' %}" method="get">
+        <div class="search-input-wrapper">
+            <input type="text" name="q" class="search-input" placeholder="Tìm kiếm người dùng..." value="{{ request.GET.q|default:'' }}">
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
+</div>
 
 <h2>
     {% if query %}

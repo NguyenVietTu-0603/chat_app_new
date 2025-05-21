@@ -1,40 +1,207 @@
 {% extends "includes/layouts/a.html" %}
 {% block content %}
 {% load static %}
+<style>
+    body {
+        background-color: #f9fafc;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 26px;
+        color: #2c3e50;
+        margin-bottom: 30px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto;
+        max-width: 800px;
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    li div:first-child {
+        display: flex;
+        align-items: center;
+    }
+
+    img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 20px;
+        border: 2px solid #e0e0e0;
+        transition: border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    li:hover img {
+        border-color: #3498db;
+        transform: scale(1.1);
+    }
+
+    h3 {
+        font-size: 20px;
+        color: #34495e;
+        margin: 0;
+    }
+
+    p {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin: 5px 0 0;
+    }
+
+    li div:last-child {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    button,
+    form button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-success {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #27ae60;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+    .no-requests {
+        text-align: center;
+        font-size: 18px;
+        color: #bdc3c7;
+        margin-top: 30px;
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons a,
+    .action-buttons button {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        display: inline-block;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-buttons a.btn-info {
+        background-color: #3498db;
+    }
+
+    .action-buttons a.btn-info:hover {
+        background-color: #2980b9;
+    }
+
+    .action-buttons form {
+        display: inline;
+    }
+    .btn-info {
+        color: rgb(71, 184, 255);
+    font-size: 16px;
+    padding: 10px 22px;
+    text-decoration: none;
+    font-weight: bold;
+}
+</style>
 <h2>Lời mời kết bạn đang chờ</h2>
 
 {% if pending_requests %}
-    <ul>
+<ul>
     {% for request in pending_requests %}
-        <li>
-            <div>
-                <img src="{{ request.sender.profile.avatar }}" alt="{{ request.sender.username }}" width="50" height="50">
-                <h3>{{ request.sender.profile.name }}</h3>
-                <p>
-                    @{{ request.sender.username }}
-                    {% if request.sender.profile.location %}
-                        - {{ request.sender.profile.location }}
-                    {% endif %}
-                </p>
-            </div>
-            
-            <div>
-                <a href="{% url 'user_profile' request.sender.id %}">Xem hồ sơ</a>
-                <form action="{% url 'accept_friend_request' request.sender.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit">Chấp nhận</button>
-                </form>
-                <form action="{% url 'decline_friend_request' request.sender.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit">Từ chối</button>
-                </form>
-            </div>
-        </li>
+    <li>
+        <div>
+            <img src="{{ request.sender.profile.avatar }}" alt="{{ request.sender.username }}">
+            <h3>{{ request.sender.profile.name }}</h3>
+            <p>
+                @{{ request.sender.username }}
+                {% if request.sender.profile.location %}
+                - {{ request.sender.profile.location }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'user_profile' request.sender.id %}" class="btn btn-info">Xem hồ sơ</a>
+            <form action="{% url 'accept_friend_request' request.sender.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Chấp nhận</button>
+            </form>
+            <form action="{% url 'decline_friend_request' request.sender.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Từ chối</button>
+            </form>
+        </div>
+    </li>
     {% endfor %}
-
-    </ul>
+</ul>
 {% else %}
-    <p>Bạn không có lời mời kết bạn nào đang chờ.</p>
-    <p><a href="{% url 'user_list' %}">Tìm bạn bè</a></p>
+<p class="no-requests">Bạn không có lời mời kết bạn nào đang chờ.</p>
+<div style="text-align:center; margin-top: 20px;">
+    <a href="{% url 'user_list' %}" class="btn btn-info">Tìm bạn bè</a>
+</div>
 {% endif %}
 {% endblock content %}

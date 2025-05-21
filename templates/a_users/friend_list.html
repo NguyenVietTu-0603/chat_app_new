@@ -1,6 +1,191 @@
 {% extends "includes/layouts/a.html" %}
 {% block content %}
 {% load static %}
+<style>
+ body {
+    background-color: #f9fafc;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    text-align: center;
+    font-size: 26px;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+li div:first-child {
+    display: flex;
+    align-items: center;
+}
+
+img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 20px;
+    border: 2px solid #e0e0e0;
+    transition: border-color 0.3s ease, transform 0.2s ease;
+}
+
+li:hover img {
+    border-color: #3498db;
+    transform: scale(1.1);
+}
+
+h3 {
+    font-size: 20px;
+    color: #34495e;
+    margin: 0;
+}
+
+p {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 5px 0 0;
+}
+
+li div:last-child {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+button, form button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+}
+
+.btn-warning:hover {
+    background-color: #d68910;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.no-friends {
+    text-align: center;
+    font-size: 18px;
+    color: #bdc3c7;
+    margin-top: 30px;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.action-buttons a,
+.action-buttons button {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons a.btn-info {
+    background-color: #3498db;
+}
+
+.action-buttons a.btn-info:hover {
+    background-color: #2980b9;
+}
+
+.action-buttons a.btn-success {
+    background-color: #2ecc71;
+}
+
+.action-buttons a.btn-success:hover {
+    background-color: #27ae60;
+}
+
+.action-buttons form {
+    display: inline;
+}
+
+.action-buttons button.btn-warning:hover {
+    background-color: #d68910;
+}
+
+.action-buttons button.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+</style>
 <h2>Danh sách bạn bè</h2>
 
 {% if friends %}
@@ -10,19 +195,30 @@
                 <div>
                     <img src="{{ friend.profile.avatar }}" alt="{{ friend.username }}" width="50" height="50">
                     <h3>{{ friend.profile.name }}</h3>
-                    <p>
+                    {% comment %} <p>
                         @{{ friend.username }}
                         {% if friend.profile.location %}
                             - {{ friend.profile.location }}
                         {% endif %}
-                    </p>
+                    </p> {% endcomment %}
                 </div>
                 
-                <div>
-                    <a href="{% url 'user_profile' friend.id %}">Xem hồ sơ</a>
-                    <a href="{% url 'unfriend' friend.id %}">Hủy kết bạn</a>
-                    <a href="{% url 'block_user' friend.id %}">Chặn</a>
-                </div>
+            <div class="action-buttons">
+                <a href="{% url 'user_profile' friend.id %}" class="btn btn-info">Xem hồ sơ</a>
+                <a href="{% url 'private_chat_room' friend.username %}" class="btn btn-success">Nhắn tin</a>
+
+                <form action="{% url 'unfriend' friend.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning">Hủy kết bạn</button>
+                </form>
+
+                <form action="{% url 'block_user' friend.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Chặn</button>
+                </form>
+            </div>
+
+
             </li>
         {% endfor %}
     </ul>

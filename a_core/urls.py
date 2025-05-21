@@ -22,8 +22,6 @@ from a_rtchat.views import *
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from . import views
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
@@ -36,8 +34,9 @@ urlpatterns = [
     
     path('friends/send/<int:user_id>/', send_friend_request, name='send_friend_request'),
     path('friends/accept/<int:user_id>/', accept_friend_request, name='accept_friend_request'),
-    path('friends/decline/<int:request_id>/', decline_friend_request, name='decline_friend_request'),
-    path('friends/cancel/<int:request_id>/', cancel_friend_request, name='cancel_friend_request'),
+    path('friends/decline/<int:user_id>/', decline_friend_request, name='decline_friend_request'),
+    path('friends/cancel/<int:user_id>/', cancel_friend_request, name='cancel_friend_request'),
+    path('friends/unfriend/<int:user_id>/', unfriend, name='unfriend'),
     path('friends/remove/<int:user_id>/', remove_friend, name='remove_friend'),
     path('users/block/<int:user_id>/', block_user, name='block_user'),
     path('users/unblock/<int:user_id>/', unblock_user, name='unblock_user'),
@@ -52,7 +51,9 @@ urlpatterns = [
     path('users/search_users', search_users, name='search_users'),   
     path('users/friend_list', friend_list, name='friend_list'),   
     path('users/pending_requests', pending_requests, name='pending_requests'), 
-    path('video-call/', views.video_call_view, name='video_call'), 
+    path('post/like/', like_post, name='like_post'),
+    path('post/comment/', add_comment, name='add_comment'),
+    path('chat/', include('a_rtchat.urls')),
     
 ]
 

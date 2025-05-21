@@ -3,7 +3,6 @@
 {% load static %}
 <style>
     body {
-        font-family: Arial, sans-serif;
         background-color: #fafafa;
         margin: 0;
         padding: 0;
@@ -125,23 +124,49 @@
         <div><span id="friend-count">{{ friend_count }}</span> bạn bè</div>
     </div>
 
+
     {% if user != profile_user %}
-    <div class="action-buttons">
-        {% if is_friend %}
-            <a href="{% url 'unfriend' profile_user.id %}">Hủy kết bạn</a>
-            <a href="{% url 'block_user' profile_user.id %}">Chặn</a>
-        {% elif is_pending %}
-            <a href="{% url 'accept_friend_request' profile_user.id %}">Chấp nhận</a>
-            <a href="{% url 'decline_friend_request' profile_user.id %}">Từ chối</a>
-        {% elif request_sent %}
-            <a href="{% url 'cancel_friend_request' profile_user.id %}">Hủy lời mời</a>
-        {% elif is_blocked %}
-            <a href="{% url 'unblock_user' profile_user.id %}">Bỏ chặn</a>
-        {% else %}
-            <a href="{% url 'send_friend_request' profile_user.id %}">Kết bạn</a>
-            <a href="{% url 'block_user' profile_user.id %}">Chặn</a>
-        {% endif %}
-    </div>
+        <div class="action-buttons">
+            {% if is_friend %}
+                <form action="{% url 'unfriend' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning">Hủy kết bạn</button>
+                </form>
+                <form action="{% url 'block_user' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Chặn</button>
+                </form>
+                <button class="btn btn-danger" onclick="window.location.href='{% url 'private_chat_room' profile_user.username  %}'">Nhắn Tin</button>
+            {% elif is_pending %}
+                <form action="{% url 'accept_friend_request' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Chấp nhận</button>
+                </form>
+                <form action="{% url 'decline_friend_request' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">Từ chối</button>
+                </form>
+            {% elif request_sent %}
+                <form action="{% url 'cancel_friend_request' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light">Hủy lời mời</button>
+                </form>
+            {% elif is_blocked %}
+                <form action="{% url 'unblock_user' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-info">Bỏ chặn</button>
+                </form>
+            {% else %}
+                <form action="{% url 'send_friend_request' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Kết bạn</button>
+                </form>
+                <form action="{% url 'block_user' profile_user.id %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Chặn</button>
+                </form>
+            {% endif %}
+        </div>
     {% endif %}
 </div>
 

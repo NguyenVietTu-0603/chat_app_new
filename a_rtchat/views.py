@@ -3,8 +3,6 @@ from .models import ChatGroup, GroupMessage,PrivateChat, PrivateMessage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, Max
-import time
-from agora_token_builder import RtcTokenBuilder
 
 @login_required(login_url='/accounts/login/')
 def chat_view(request, group_name):
@@ -44,7 +42,7 @@ def private_chat_room(request, username):
     messages = chat.messages.all().order_by('created')
 
     # Lấy tin nhắn cuối cùng
-    last_message = messages.last()
+    last_message = chat.messages.filter(sender=request.user).order_by('created').last()
 
      # Annotate thời gian tin nhắn gần nhất cho từng cuộc trò chuyện
     chats = PrivateChat.objects.filter(Q(user1=request.user) | Q(user2=request.user)) \
@@ -59,15 +57,8 @@ def private_chat_room(request, username):
         'other_user': other_user,
         'users': chats,
     })
+@login_required
+def video_call(request, username):
+    other_user = get_object_or_404(User, username=username)
+    return render(request, 'a_rtchat/video_call.html', {'other_user': other_user})
 
-def generate_agora_token(request):
-    app_id = "7cb464ea47294418a5ec225bc89b0c11"
-    app_certificate = "68a0d5c4bec64b81843b76b134c2f554"
-    channel_name = "test_channel"
-    uid = request.user.id
-    expiration_time_in_seconds = 3600
-    current_timestamp = int(time.time())
-    privilege_expired_ts = current_timestamp + expiration_time_in_seconds
-
-    token = RtcTokenBuilder.buildTokenWithUid(app_id, app_certificate, channel_name, uid, 1, privilege_expired_ts)
-    return JsonResponse({'token': token})

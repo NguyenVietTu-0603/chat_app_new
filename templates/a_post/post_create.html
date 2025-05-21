@@ -1,64 +1,287 @@
 {% extends "includes/layouts/a.html" %}
-
+{% load static %}
 {% block content %}
 <style>
-    .container {
-        width: 50%;
-        margin: 20px auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f9fafb;
     }
 
-    h1 {
+    .create-post-container {
+        max-width: 600px;
+        margin: 50px auto;
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
         text-align: center;
+        color: #2c3e50;
+        font-size: 24px;
         margin-bottom: 20px;
     }
 
-    form {
-        display: flex;
-        flex-direction: column;
+    .form-group {
+        margin-bottom: 20px;
     }
 
     label {
-        font-weight: bold;
-        margin-bottom: 5px;
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #34495e;
     }
 
-    input, textarea {
+    textarea {
         width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1em;
+        padding: 12px 0px 12px 12px;
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        resize: none;
+        font-size: 14px;
+        color: #2c3e50;
+        background-color: #f9fafb;
+        transition: border-color 0.3s;
     }
 
-    button {
-        background: #007bff;
-        color: white;
-        padding: 10px;
+    textarea:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    input[type="file"] {
+        display: block;
+        margin-top: 5px;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #007bff;
+        color: #ffffff;
         border: none;
-        border-radius: 5px;
-        font-size: 1.2em;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .custom-file-upload {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .upload-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .upload-btn:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    .upload-btn:active {
+        transform: translateY(0);
+    }
+
+    #file-name {
+        font-size: 14px;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    .post-preview {
+        margin-top: 20px;
+        padding: 10px;
+        display: none;
+    }
+
+    #preview-image,
+    #preview-video {
+        margin-top: 10px;
+    }
+
+    .slider {
+        position: relative;
+        width: 100%;
+        max-width: 360px;
+        height: 640px;
+        overflow: hidden;
+        margin: 20px auto 0;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .slider .click-zone {
+        position: absolute;
+        top: 0;
+        width: 15%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .slider .click-zone.left {
+        left: 0;
+    }
+
+    .slider .click-zone.right {
+        right: 0;
+    }
+
+    .slider .slides {
+        display: flex;
+        transition: transform 0.4s ease-in-out;
+        width: 100%;
+    }
+
+    .slider img,
+    .slider video {
+        width: 100%;
+        height: 640px;
+        flex-shrink: 0;
+    }
+
+    .slider img {
+        object-fit: cover;
+    }
+
+    .slider video {
+        object-fit: contain;
+        background-color: black;
+    }
+
+    .dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 5px;
+    }
+
+    .dot {
+        width: 7px;
+        height: 7px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
         cursor: pointer;
         transition: background 0.3s;
     }
 
-    button:hover {
-        background: #0056b3;
+    .dot.active {
+        background: white;
     }
+
+    textarea {
+        width: 100%;
+        padding: 12px 0px 12px 12px;
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        resize: none;
+        font-size: 14px;
+        color: #2c3e50;
+        background-color: #f9fafb;
+        transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    #post-title {
+        width: 100%;
+        padding: 12px 0px 12px 12px;
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #2c3e50;
+        background-color: #f9fafb;
+        transition: border-color 0.3s;
+        margin-bottom: 0;
+    }
+
+    #post-title:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
 </style>
 
-<div class="container">
-    <h1>Thêm bài viết mới</h1>
-    
-    <form method="POST" enctype="multipart/form-data">
+<div class="create-post-container">
+    <h2>Tạo bài viết mới</h2>
+    <form id="create-post-form" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        
-        <button type="submit">Đăng bài</button>
+        <div class="form-group">
+            <label for="post-title">Tiêu đề:</label>
+            <input id="post-title" name="title" type="text" placeholder="Nhập tiêu đề bài viết">
+        </div>
+        <div class="form-group">
+            <label for="post-image" class="upload-btn">Thêm ảnh</label>
+            <input type="file" id="post-image" name="image" accept="image/*" style="display: none;">
+            <span id="file-name">Chưa chọn tệp nào</span>
+        </div>
+        <div class="form-group">
+            <label for="post-body">Nội dung:</label>
+            <textarea id="post-body" name="body" rows="4" placeholder="Bạn đang nghĩ gì?"></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Đăng bài</button>
     </form>
+    <div id="post-preview" class="post-preview">
+        <p id="preview-text"></p>
+        <div class="slider">
+            <div class="slides" id="media-slides"></div>
+            <div class="dots" id="media-dots"></div>
+        </div>
+    </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const uploadBtn = document.querySelector('.upload-btn');
+        const postImageInput = document.getElementById('post-image');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        if (uploadBtn && postImageInput) {
+            uploadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                postImageInput.click();
+            });
+        }
+
+        if (postImageInput && fileNameDisplay) {
+            postImageInput.addEventListener('change', function () {
+                if (postImageInput.files.length > 0) {
+                    fileNameDisplay.textContent = postImageInput.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = "Chưa chọn tệp nào";
+                }
+            });
+        }
+    });
+</script>
+<!-- <script src="{% static 'js/create.js' %}"></script> -->
 {% endblock content %}

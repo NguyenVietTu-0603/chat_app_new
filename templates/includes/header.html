@@ -1,9 +1,10 @@
+    {% load static %}
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
 
         body {
             margin: 0;
-            font-family: 'Roboto', sans-serif;
+            
         }
 
         .header {
@@ -17,9 +18,15 @@
         }
 
         .header .logo {
-            font-size: 20px;
-            font-weight: bold;
-        }
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Khoảng cách giữa logo và text */
+}
+
+.header .logo img {
+    width: 150px; /* Kích thước logo */
+    object-fit: contain; /* Đảm bảo hình ảnh không bị méo */
+}
 
         .header .search-bar {
             flex: 0.3;
@@ -140,7 +147,7 @@
         });
     </script>
     <div class="header">
-        <div class="logo">SocialApp</div>
+        <div class="logo"><img src="{% static 'images/ChatLogo.png' %}" alt=""></div>
         <div class="search-bar">
             <div class="InputContainer">
                 <input class="input" type="text" placeholder="Tìm kiếm trên SocialApp">
@@ -150,8 +157,8 @@
             <div class="nav-links">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
                 <a href=""><i class="fas fa-bell"></i></a>
-                <a href="{% url 'listroom' %}"><i class="fas fa-comments"></i></a>
-                <a href="#"><i class="fas fa-users"></i></a>
+                <a href="{% url 'listroom_private' %}"><i class="fas fa-comments"></i></a>
+                <a href="{% url 'friend_list' %}"><i class="fas fa-users"></i></a>
             </div>
             {% if user.is_authenticated %}
             <div class="avatar">

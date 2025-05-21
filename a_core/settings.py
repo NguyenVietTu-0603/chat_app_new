@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'a_users.context_processors.friends_context',
             ],
         },
     },
@@ -151,7 +152,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://7ebf-1-52-39-181.ngrok-free.app',
     'https://*.ngrok-free.app'
 ]
 ALLOWED_HOSTS = [

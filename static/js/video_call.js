@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const localVideo = document.getElementById("local-video");
     const remoteVideo = document.getElementById("remote-video");
     const callStatus = document.getElementById("call-status");
+    const cameraButton = document.getElementById("camera-button");
 
 
     let localStream;
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         peerConnection.onicecandidate = event => {
             if (event.candidate) {
-                // Send the candidate to the remote peer
+                console.log("Sending ICE candidate:", event.candidate); // Thêm log
                 sendMessage({ type: "ice-candidate", candidate: event.candidate });
             }
         };
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 remoteStream = new MediaStream();
                 remoteVideo.srcObject = remoteStream;
             }
+            console.log("Adding track to remote stream:", event.track); // Thêm log
             remoteStream.addTrack(event.track);
         };
         const offer = await peerConnection.createOffer();
@@ -82,10 +84,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function handleVideoOffer(offer) {
+        if (!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localVideo.srcObject = localStream;
+        }
         peerConnection = new RTCPeerConnection(configuration);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-
 
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
@@ -93,13 +98,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function handleIceCandidate(candidate) {
+        console.log("Received ICE candidate:", candidate); // Thêm log
         peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
 
-    
+
 
     socket.onmessage = function (event) {
+        console.log("Message received:", event.data); // Thêm log
         const data = JSON.parse(event.data);
         receiveMessage(data);
     };
+
+
+let isCameraOn = true;
+
+cameraButton.onclick = () => {
+    if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            isCameraOn = !isCameraOn;
+            videoTrack.enabled = isCameraOn; // Bật/tắt video track
+            cameraButton.textContent = isCameraOn ? "Turn Off Camera" : "Turn On Camera";
+            console.log(`Camera is now ${isCameraOn ? "ON" : "OFF"}`);
+        }
+    }
+};
 });

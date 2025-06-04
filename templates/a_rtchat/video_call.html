@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'css/boxchat.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/video_call.js' %}"></script>
+    <script src="{% static 'js/video_call.js' %}?v={{ timestamp }}"></script>
 </head>
 
 <body>
@@ -17,7 +17,7 @@
         <div class="video-call-header">
             <h2>Video Call with {{ other_user.profile.realname }}</h2>
             <span id="call-status"></span>
-            <button id="end-call" class="end-call-btn">End Call</button>
+            <button id="end-call" class="end-call-btn" style="color: aqua;">End Call</button>
         </div>
         <div class="video-call-body">
             <video id="local-video" autoplay muted></video>

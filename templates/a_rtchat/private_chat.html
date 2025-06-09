@@ -219,7 +219,14 @@
         const fileInput = document.getElementById("file-input");
         const videoCallButton = document.getElementById("start-call-button");
         videoCallButton.onclick = function () {
-            window.location.href = "{% url 'video_call' other_user.username %}";
+            // Gửi tín hiệu gọi đến cho người kia qua WebSocket
+            socket.send(JSON.stringify({
+                type: "incoming-call",
+                from: username,
+                to: otherUsername
+            }));
+            // (Tùy chọn) Có thể chuyển sang phòng video call luôn nếu muốn
+            window.location.href = `/chat/video-call/${otherUsername}/?user={{ request.user.username }}&other=${otherUsername}&initiator=false`;
         };
 
         // Thêm container cho loading bar
@@ -341,8 +348,48 @@
             let content = "";
             let messageText = ""; // Lưu nội dung tin nhắn để cập nhật danh sách
             const type = (data.msg_type || "").toLowerCase().trim();
-
-            if (type === "image") {
+            console.log("Xin chào, đây là dòng in ra console!");
+            console.log(type);
+            console.log("Xin chào, đây là dòng in ra console!");
+            if (type === "incoming-call" ) {
+                console.log("alo");
+                content = `<!-- Div thông báo cuộc gọi -->
+                            <div id="incomingCall" style="
+                            position: fixed;
+                            top: 0; left: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            background-color: rgba(0, 0, 0, 0.6);
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            z-index: 9999;
+                            ">
+                            <div style="
+                                background: white;
+                                padding: 30px;
+                                border-radius: 16px;
+                                text-align: center;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                            ">
+                                <h2>📞 Có cuộc gọi đến từ <span id="callerName">user1</span></h2>
+                                <div style="margin-top: 20px;">
+                                <a class="text btn btn-success" 
+                                    href="/chat/video-call/${username}/?user=${username}&other=${otherUsername}&initiator=true"
+                                    style="margin-right: 15px; padding: 10px 20px; background-color: #28a745; color: white; border-radius: 5px; text-decoration: none;">
+                                    📞 Nhận cuộc gọi
+                                </a>
+                                <button onclick="document.getElementById('incomingCall').style.display='none'"
+                                        style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px;">
+                                    ❌ Từ chối
+                                </button>
+                                </div>
+                            </div>
+                            </div>
+                            `;
+                messageText = `[Cuộc gọi đến từ ${otherUsername}]`;
+            }
+            else if (type === "image") {
                 let fileUrl = data.file_url;
                 if (!fileUrl.startsWith("/")) {
                     fileUrl = "/" + fileUrl;

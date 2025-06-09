@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Components</title>
+    <style>
+        /* CSS cho video call overlay */
+        .video-call-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-call-container {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-call-header {
+            background: #2d2d2d;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .caller-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .caller-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .caller-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .call-duration {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .video-main-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .remote-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .local-video-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            background: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .local-video-container:hover {
+            transform: scale(1.05);
+            border-color: #007bff;
+        }
+
+        .local-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror effect for local video */
+        }
+
+        .video-controls {
+            background: #2d2d2d;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-mute {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-mute.muted {
+            background: #dc3545;
+        }
+
+        .btn-camera {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-camera.off {
+            background: #dc3545;
+        }
+
+        .btn-end-call {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-end-call:hover {
+            background: #c82333;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            font-size: 18px;
+        }
+
+        .video-placeholder i {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connecting {
+            background: #ffc107;
+        }
+
+        .status-dot.disconnected {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .video-call-container {
+                width: 95%;
+                height: 95%;
+            }
+
+            .local-video-container {
+                width: 120px;
+                height: 90px;
+                top: 10px;
+                right: 10px;
+            }
+
+            .video-controls {
+                padding: 15px;
+                gap: 10px;
+            }
+
+            .control-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HTML cho Video Call Overlay (thêm vào cuối body của file gốc) -->
+<div class="video-call-overlay" id="video-call-overlay">
+    <div class="video-call-container">
+        <!-- Header với thông tin người gọi -->
+        <div class="video-call-header">
+            <div class="caller-info">
+                <img src="" alt="Avatar" class="caller-avatar" id="caller-avatar">
+                <div>
+                    <div class="caller-name" id="caller-name">Đang kết nối...</div>
+                    <div class="call-duration" id="call-duration">00:00</div>
+                </div>
+            </div>
+            <div class="connection-status" id="connection-status">
+                <div class="status-dot connecting" id="status-dot"></div>
+                <span id="status-text">Đang kết nối...</span>
+            </div>
+        </div>
+
+        <!-- Container chính cho video -->
+        <div class="video-main-container">
+            <!-- Video của người đối diện -->
+            <video class="remote-video" id="remote-video" autoplay playsinline>
+                <div class="video-placeholder">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Đang chờ video...</span>
+                </div>
+            </video>
+
+            <!-- Video của bản thân (nhỏ, góc phải) -->
+            <div class="local-video-container" id="local-video-container">
+                <video class="local-video" id="local-video" autoplay muted playsinline></video>
+            </div>
+        </div>
+
+        <!-- Điều khiển cuộc gọi -->
+        <div class="video-controls">
+            <button class="control-btn btn-mute" id="mute-btn" title="Tắt/Bỏ tắt mic">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="control-btn btn-camera" id="camera-btn" title="Tắt/Bật camera">
+                <i class="fas fa-video"></i>
+            </button>
+            <button class="control-btn btn-end-call" id="end-call-btn" title="Kết thúc cuộc gọi">
+                <i class="fas fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+class VideoCallManager {
+    constructor() {
+        this.localStream = null;
+        this.remoteStream = null;
+        this.isVideoEnabled = true;
+        this.isAudioEnabled = true;
+        this.callStartTime = null;
+        this.callTimer = null;
+        this.videoSocket = null;
+        this.isCallActive = false;
+        
+        // DOM elements
+        this.overlay = document.getElementById('video-call-overlay');
+        this.localVideo = document.getElementById('local-video');
+        this.remoteVideo = document.getElementById('remote-video');
+        this.muteBtn = document.getElementById('mute-btn');
+        this.cameraBtn = document.getElementById('camera-btn');
+        this.endCallBtn = document.getElementById('end-call-btn');
+        this.callerName = document.getElementById('caller-name');
+        this.callerAvatar = document.getElementById('caller-avatar');
+        this.callDuration = document.getElementById('call-duration');
+        this.statusDot = document.getElementById('status-dot');
+        this.statusText = document.getElementById('status-text');
+        
+        this.initializeEventListeners();
+    }
+
+    initializeEventListeners() {
+        // Nút điều khiển
+        this.muteBtn.addEventListener('click', () => this.toggleMute());
+        this.cameraBtn.addEventListener('click', () => this.toggleCamera());
+        this.endCallBtn.addEventListener('click', () => this.endCall());
+        
+        // Click vào video local để switch view (tùy chọn)
+        document.getElementById('local-video-container').addEventListener('click', () => {
+            this.switchVideoViews();
+        });
+    }
+
+    // Bắt đầu cuộc gọi video
+    async startVideoCall(otherUsername, otherUserAvatar, otherUserRealname) {
+        try {
+            // Hiển thị overlay
+            this.overlay.style.display = 'flex';
+            this.isCallActive = true;
+            
+            // Cập nhật thông tin người gọi
+            this.callerName.textContent = otherUserRealname;
+            this.callerAvatar.src = otherUserAvatar;
+            
+            // Lấy media stream
+            await this.getUserMedia();
+            
+            // Khởi tạo WebSocket cho video call
+            this.initializeVideoSocket(otherUsername);
+            
+            // Bắt đầu timer
+            this.startCallTimer();
+            
+            // Cập nhật trạng thái
+            this.updateConnectionStatus('connecting', 'Đang kết nối...');
+            
+        } catch (error) {
+            console.error('Lỗi khi bắt đầu video call:', error);
+            alert('Không thể truy cập camera/microphone. Vui lòng kiểm tra quyền truy cập.');
+            this.endCall();
+        }
+    }
+
+    // Lấy media stream từ camera và microphone
+    async getUserMedia() {
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                },
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+            
+            this.localVideo.srcObject = this.localStream;
+            
+        } catch (error) {
+            console.error('Lỗi truy cập media:', error);
+            throw error;
+        }
+    }
+
+    // Khởi tạo WebSocket cho video call
+    initializeVideoSocket(otherUsername) {
+        const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+        const socketUrl = `${protocol}${window.location.host}/ws/video-call/${otherUsername}/`;
+        
+        this.videoSocket = new WebSocket(socketUrl);
+        
+        this.videoSocket.onopen = () => {
+            console.log('Video WebSocket connected');
+            this.updateConnectionStatus('connected', 'Đã kết nối');
+            this.startVideoStreaming();
+        };
+        
+        this.videoSocket.onmessage = (event) => {
+            this.handleVideoMessage(event);
+        };
+        
+        this.videoSocket.onclose = () => {
+            console.log('Video WebSocket disconnected');
+            this.updateConnectionStatus('disconnected', 'Mất kết nối');
+        };
+        
+        this.videoSocket.onerror = (error) => {
+            console.error('Video WebSocket error:', error);
+            this.updateConnectionStatus('disconnected', 'Lỗi kết nối');
+        };
+    }
+
+    // Bắt đầu streaming video
+    startVideoStreaming() {
+        if (!this.localStream || !this.videoSocket) return;
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const video = this.localVideo;
+        
+        canvas.width = 320; // Giảm resolution để tối ưu bandwidth
+        canvas.height = 240;
+        
+        const streamVideo = () => {
+            if (!this.isCallActive) return;
+            
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Chuyển đổi canvas thành base64
+                const frameData = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // Gửi frame qua WebSocket
+                if (this.videoSocket.readyState === WebSocket.OPEN) {
+                    this.videoSocket.send(JSON.stringify({
+                        type: 'video_frame',
+                        data: frameData,
+                        timestamp: Date.now()
+                    }));
+                }
+            }
+            
+            setTimeout(streamVideo, 100); // 10 FPS để tối ưu
+        };
+        
+        streamVideo();
+    }
+
+    // Xử lý tin nhắn video từ WebSocket
+    handleVideoMessage(event) {
+        const data = JSON.parse(event.data);
+        
+        switch (data.type) {
+            case 'video_frame':
+                this.displayRemoteFrame(data.data);
+                break;
+            case 'audio_muted':
+                this.handleRemoteAudioToggle(data.muted);
+                break;
+            case 'video_disabled':
+                this.handleRemoteVideoToggle(data.disabled);
+                break;
+            case 'call_ended':
+                this.endCall();
+                break;
+            default:
+                console.log('Unknown message type:', data.type);
+        }
+    }
+
+    // Hiển thị frame video từ người đối diện
+    displayRemoteFrame(frameData) {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            // Chuyển canvas thành video stream
+            const stream = canvas.captureStream(10);
+            this.remoteVideo.srcObject = stream;
+        };
+        img.src = frameData;
+    }
+
+    // Toggle mute/unmute
+    toggleMute() {
+        if (!this.localStream) return;
+        
+        this.isAudioEnabled = !this.isAudioEnabled;
+        const audioTracks = this.localStream.getAudioTracks();
+        
+        audioTracks.forEach(track => {
+            track.enabled = this.isAudioEnabled;
+        });
+        
+        // Cập nhật UI
+        this.muteBtn.classList.toggle('muted', !this.isAudioEnabled);
+        this.muteBtn.querySelector('i').className = this.isAudioEnabled ? 
+            'fas fa-microphone' : 'fas fa-microphone-slash';
+        
+        // Thông báo cho người đối diện
+        if (this.videoSocket && this.videoSocket.readyState === WebSocket.OPEN) {
+            this.videoSocket.send(JSON.stringify({
+                type: 'audio_muted',
+                muted: !this.isAudioEnabled
+            }));
+        }
+    }
+
+    // Toggle camera on/off
+    toggleCamera() {
+        if (!this.localStream) return;
+        
+        this.isVideoEnabled = !this.isVideoEnabled;
+        const videoTracks = this.localStream.getVideoTracks();
+        
+        videoTracks.forEach(track => {
+            track.enabled = this.isVideoEnabled;
+        });
+        
+        // Cập nhật UI
+        this.cameraBtn.classList.toggle('off', !this.isVideoEnabled);
+        this.cameraBtn.querySelector('i').className = this.isVideoEnabled ? 
+            'fas fa-video' : 'fas fa-video-slash';
+        
+        // Thông báo cho người đối diện
+        if (this.videoSocket && this.videoSocket.readyState === WebSocket.OPEN) {
+            this.videoSocket.send(JSON.stringify({
+                type: 'video_disabled',
+                disabled: !this.isVideoEnabled
+            }));
+        }
+    }
+
+    // Switch video views (local <-> remote)
+    switchVideoViews() {
+        const localSrc = this.localVideo.srcObject;
+        const remoteSrc = this.remoteVideo.srcObject;
+        
+        this.localVideo.srcObject = remoteSrc;
+        this.remoteVideo.srcObject = localSrc;
+    }
+
+    // Kết thúc cuộc gọi
+    endCall() {
+        this.isCallActive = false;
+        
+        // Thông báo cho người đối diện
+        if (this.videoSocket && this.videoSocket.readyState === WebSocket.OPEN) {
+            this.videoSocket.send(JSON.stringify({
+                type: 'call_ended'
+            }));
+            this.videoSocket.close();
+        }
+        
+        // Dừng tất cả media tracks
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+        
+        // Dừng timer
+        if (this.callTimer) {
+            clearInterval(this.callTimer);
+            this.callTimer = null;
+        }
+        
+        // Ẩn overlay
+        this.overlay.style.display = 'none';
+        
+        // Reset UI
+        this.resetUI();
+    }
+
+    // Reset UI về trạng thái ban đầu
+    resetUI() {
+        this.muteBtn.classList.remove('muted');
+        this.cameraBtn.classList.remove('off');
+        this.muteBtn.querySelector('i').className = 'fas fa-microphone';
+        this.cameraBtn.querySelector('i').className = 'fas fa-video';
+        this.callDuration.textContent = '00:00';
+        this.localVideo.srcObject = null;
+        this.remoteVideo.srcObject = null;
+    }
+
+    // Bắt đầu timer cuộc gọi
+    startCallTimer() {
+        this.callStartTime = Date.now();
+        this.callTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.callStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            this.callDuration.textContent = `${minutes}:${seconds}`;
+        }, 1000);
+    }
+
+    // Cập nhật trạng thái kết nối
+    updateConnectionStatus(status, text) {
+        this.statusDot.className = `status-dot ${status}`;
+        this.statusText.textContent = text;
+    }
+
+    // Xử lý khi người đối diện toggle audio
+    handleRemoteAudioToggle(muted) {
+        // Có thể hiển thị icon mute trên video remote
+        console.log(`Remote audio ${muted ? 'muted' : 'unmuted'}`);
+    }
+
+    // Xử lý khi người đối diện toggle video
+    handleRemoteVideoToggle(disabled) {
+        if (disabled) {
+            // Hiển thị placeholder khi camera tắt
+            this.remoteVideo.style.display = 'none';
+            // Thêm placeholder nếu cần
+        } else {
+            this.remoteVideo.style.display = 'block';
+        }
+    }
+}
+
+// Khởi tạo VideoCallManager
+const videoCallManager = new VideoCallManager();
+
+// Hàm để bắt đầu video call (gọi từ button trong chat)
+function startVideoCall(otherUsername, otherUserAvatar, otherUserRealname) {
+    videoCallManager.startVideoCall(otherUsername, otherUserAvatar, otherUserRealname);
+}
+
+// Export để sử dụng trong file gốc
+window.VideoCallManager = VideoCallManager;
+window.startVideoCall = startVideoCall;
+</script>
+
+</body>
+</html>

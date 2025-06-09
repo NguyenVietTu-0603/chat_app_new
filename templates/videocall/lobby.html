@@ -1,0 +1,116 @@
+{% extends 'videocall/base.html' %}
+{% load static %}
+
+{% block title %}Video Call Lobby{% endblock %}
+
+{% block content %}
+<div class="lobby-container">
+    <div class="lobby-header">
+        <h1>Video Call Lobby</h1>
+        <p>Welcome, {{ user.username }}!</p>
+    </div>
+    
+    <div class="lobby-actions">
+        <div class="action-card">
+            <h3>Create New Room</h3>
+            <form id="create-room-form">
+                <input type="text" id="room-name" placeholder="Room Name" required>
+                <select id="room-type">
+                    <option value="private">Private Call (1vs1)</option>
+                    <option value="group">Group Call</option>
+                </select>
+                <input type="number" id="max-participants" placeholder="Max Participants" value="10" min="2" max="50">
+                <button type="submit">Create Room</button>
+            </form>
+        </div>
+        
+        <div class="action-card">
+            <h3>Join Existing Room</h3>
+            <form id="join-room-form">
+                <input type="text" id="room-id" placeholder="Room ID" required>
+                <button type="submit">Join Room</button>
+            </form>
+        </div>
+    </div>
+    
+    {% if user_rooms %}
+    <div class="recent-rooms">
+        <h3>Your Recent Rooms</h3>
+        <div class="rooms-list">
+            {% for room in user_rooms %}
+            <div class="room-item">
+                <div class="room-info">
+                    <h4>{{ room.name }}</h4>
+                    <p>{{ room.room_type|title }} - {{ room.current_participants_count }}/{{ room.max_participants }} participants</p>
+                    <small>Created: {{ room.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+                <a href="{% url 'room' room.id %}" class="join-btn">Join</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('create-room-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('room-name').value,
+        type: document.getElementById('room-type').value,
+        max_participants: parseInt(document.getElementById('max-participants').value)
+    };
+    
+    try {
+        const response = await fetch('{% url "create_room" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = `/videocall/room/${data.room_id}/`;
+        } else {
+            alert('Error creating room: ' + data.error);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+
+document.getElementById('join-room-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const roomId = document.getElementById('room-id').value;
+    
+    try {
+        const response = await fetch('{% url "join_room" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ room_id: roomId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = `/videocall/room/${data.room_id}/`;
+        } else {
+            alert('Error joining room: ' + data.error);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

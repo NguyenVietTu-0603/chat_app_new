@@ -427,10 +427,10 @@ class VideoCallManager {
     handleUserInfo(data) {
         console.log('User info received:', data);
         if (this.callerName && data.user) {
-            this.callerName.textContent = data.user;
+            this.callerName.textContent = data.user.profile.username;
         }
         if (this.callerAvatar && data.avatar) {
-            this.callerAvatar.src = data.avatar;
+            this.callerAvatar.src = data.profile.avatar;
         }
     }
     

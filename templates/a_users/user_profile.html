@@ -99,6 +99,87 @@
     .content.active {
         display: block;
     }
+    .post {
+        max-width: 800px;
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .user-name {
+        font-size: 16px;
+        font-weight: bold;
+    }
+    .post-image {
+        width: 100%;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    .post-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .post-likes {
+        font-weight: bold;
+        margin-top: 5px;
+    }
+    .post-caption {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    .comment-section {
+        margin-top: 10px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+    }
+    .comments-list {
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+    .comment-input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .comment-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        margin-right: 10px;
+    }
+    .comment-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        background-color: #0095f6;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+    .comment-btn:hover {
+        background-color: #0077cc;
+    }
 </style>
 
 <div class="profile-container">
@@ -176,7 +257,60 @@
 </div>
 
 <div id="posts" class="content active">
-    <p>📷 Hiển thị danh sách bài viết của {{ profile_user.profile.name }}.</p>
+    {% if posts %}
+        {% for post in posts %}
+        <div class="post" data-post-id="{{ post.id }}">
+            <div class="post-header">
+                <div class="user-info">
+                    <img src="{{ post.author.profile.avatar }}" class="user-avatar" alt="User Avatar">
+                    <div class="user-name">
+                        {{ post.author.profile.name }}
+                        <span style="color: gray;">
+                            • {{ post.created|timesince }} ago
+                        </span>
+                    </div>
+                </div>
+                <i class="fas fa-ellipsis-h"></i>
+            </div>
+
+            {% if post.image %}
+            <img src="{{ post.image.url }}" class="post-image" alt="Post Image">
+            {% endif %}
+
+            <div class="post-actions">
+                <div>
+                    <i class="far fa-heart"></i>
+                    <i class="far fa-comment"></i>
+                    <i class="far fa-paper-plane"></i>
+                </div>
+                <i class="far fa-bookmark"></i>
+            </div>
+
+            <div class="post-likes">{{ post.likes.count }} lượt thích</div>
+            <div class="post-caption">
+                <b>{{ post.author.profile.name }}</b> {{ post.title }}
+            </div>
+
+            {% if post.comments.count > 0 %}
+            <div style="color:#001e3d; font-size:13px; cursor:pointer; margin-top:2px;">
+                Xem tất cả {{ post.comments.count }} bình luận
+            </div>
+            {% endif %}
+
+            <div class="comment-section">
+                <div class="comments-list">
+                    {% for comment in post.comments.all %}
+                    <div><b>{{ comment.user.profile.name }}</b>: {{ comment.content }}</div>
+                    {% empty %}
+                    <div style="color: #888;">Chưa có bình luận nào.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>📷 Người dùng chưa có bài viết nào.</p>
+    {% endif %}
 </div>
 <div id="friends" class="content">
     <p>👥 Hiển thị danh sách bạn bè của {{ profile_user.profile.name }}.</p>

@@ -1,41 +1,356 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Call</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/boxchat.css' %}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/video_call.js' %}?v={{ timestamp }}"></script>
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="{% static 'js/video-call.js' %}"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .video-call-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        .main-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #1a1a1a;
+        }
+
+        .local-video {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .call-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .caller-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .caller-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .caller-name {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .call-status {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .call-duration {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            z-index: 20;
+        }
+
+        .call-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-end {
+            background: #ff4757;
+        }
+
+        .btn-end:hover {
+            background: #ff3742;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            z-index: 20;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-connected {
+            background: #2ed573;
+        }
+
+        .status-connecting {
+            background: #ffa502;
+            animation: blink 1s infinite;
+        }
+
+        .status-disconnected {
+            background: #ff4757;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .chat-sidebar {
+            position: absolute;
+            right: -350px;
+            top: 0;
+            width: 350px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: right 0.5s ease;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-sidebar.open {
+            right: 0;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .chat-send-btn:hover {
+            background: #5568d9;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
 <body>
-    <div class="video-call-container">
-        <div class="video-call-header">
-            <h2>Video Call with {{ other_user.profile.realname }}</h2>
-            <span id="call-status"></span>
-            <button id="end-call" class="end-call-btn" style="color: aqua;">End Call</button>
+    <div class="video-call-container" id="videoContainer">
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div>Đang kết nối cuộc gọi...</div>
         </div>
-        <div class="video-call-body">
-            <video id="local-video" autoplay muted></video>
-            <video id="remote-video" autoplay></video>
+
+        <!-- Main video stream -->
+        <video class="main-video" id="remoteVideo" autoplay playsinline></video>
+        
+        <!-- Local video stream -->
+        <video class="local-video" id="localVideo" autoplay muted playsinline></video>
+
+        <!-- No video message -->
+        <div class="no-video-message" id="noVideoMessage">
+            <div class="no-video-icon">
+                <i class="fas fa-video-slash"></i>
+            </div>
+            <div class="no-video-text">Camera đã tắt</div>
         </div>
-        <div class="video-call-footer">
-            <button id="start-call-button" class="start-call-btn">Start Call</button>
-            <button id="mute-button" class="mute-btn">Mute</button>
-            <button id="camera-button" class="camera-btn">Turn Off Camera</button>
+
+        <!-- Call header -->
+        <div class="call-header">
+            <div class="caller-info">
+                <img src="{{ other_user.profile.avatar }}" alt="Avatar" class="caller-avatar" id="">
+                <div>
+                    <div class="caller-name" id="">{{ other_user.profile.realname }}</div>
+                    <div class="call-status" id="callStatus">Đang kết nối...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call duration -->
+        <div class="call-duration" id="callDuration">00:00</div>
+
+        <!-- Connection status -->
+        <div class="connection-status">
+            <span class="status-indicator status-connecting" id="statusIndicator"></span>
+            <span id="connectionText">Đang kết nối</span>
+        </div>
+
+        <!-- Call controls -->
+        <div class="call-controls">
+            <button class="control-btn btn-mute" id="muteBtn" title="Tắt/Bật micro">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="control-btn btn-camera" id="cameraBtn" title="Tắt/Bật camera">
+                <i class="fas fa-video"></i>
+            </button>
+            <button class="control-btn btn-end" id="endCallBtn" title="Kết thúc cuộc gọi">
+                <i class="fas fa-phone"></i>
+            </button>
+            <button class="control-btn btn-chat" id="chatBtn" title="Mở chat">
+                <i class="fas fa-comment"></i>
+            </button>
+            <button class="control-btn btn-share" id="shareBtn" title="Chia sẻ màn hình">
+                <i class="fas fa-desktop"></i>
+            </button>
+        </div>
+
+        <!-- Chat sidebar -->
+        <div class="chat-sidebar" id="chatSidebar">
+            <div class="chat-header">
+                <h3>Chat trong cuộc gọi</h3>
+                <button id="closeChatBtn" style="background: none; border: none; font-size: 20px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will be added here -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn...">
+                <button class="chat-send-btn" id="chatSendBtn">Gửi</button>
+            </div>
         </div>
     </div>
 </body>
-<script>
-    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsUrl = `${wsProtocol}://${window.location.host}/ws/video-call/{{ request.user.username }}/`;
-    const socket = new WebSocket(wsUrl);
-    // ...rest of your JS code...
-    window.currentUsername = "{{ request.user.username }}";
-</script>
-
 </html>

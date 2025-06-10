@@ -1,0 +1,708 @@
+{% extends 'videocall/base.html' %}
+{% load static %}
+
+{% block title %}{{ room.name }} - Video Call{% endblock %}
+
+{% block content %}
+<div class="video-call-container">
+    <div class="call-header">
+        <div class="room-info">
+            <h2>{{ room.name }}</h2>
+            <span class="room-type">{{ room.room_type|title }}</span>
+            <span id="participant-count">0 participants</span>
+        </div>
+        <div class="room-controls">
+            <button id="copy-room-id" title="Copy Room ID">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button id="leave-room" class="leave-btn">
+                <i class="fas fa-sign-out-alt"></i> Leave
+            </button>
+        </div>
+    </div>
+    
+    <div class="video-grid" id="video-grid">
+        <div class="video-container local-video">
+            <video id="local-video" autoplay muted playsinline></video>
+            <div class="video-controls">
+                <span class="username">{{ user.username }} (You)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="call-controls">
+        <button id="toggle-video" class="control-btn active" title="Toggle Video">
+            <i class="fas fa-video"></i>
+        </button>
+        <button id="toggle-audio" class="control-btn active" title="Toggle Audio">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button id="share-screen" class="control-btn" title="Share Screen">
+            <i class="fas fa-desktop"></i>
+        </button>
+        <button id="toggle-chat" class="control-btn" title="Toggle Chat">
+            <i class="fas fa-comment"></i>
+        </button>
+        <button id="settings" class="control-btn" title="Settings">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+    
+    <div class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+            <h3>Chat</h3>
+            <button id="close-chat" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button id="send-message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="settings-modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button id="close-settings" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="video-quality">Video Quality:</label>
+                    <select id="video-quality">
+                        <option value="low">Low (240p)</option>
+                        <option value="medium" selected>Medium (480p)</option>
+                        <option value="high">High (720p)</option>
+                        <option value="hd">HD (1080p)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="audio-quality">Audio Quality:</label>
+                    <select id="audio-quality">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="noise-suppression"> 
+                        Noise Suppression
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="echo-cancellation" checked> 
+                        Echo Cancellation
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-settings" class="btn btn-primary">Save</button>
+                <button id="cancel-settings" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebRTC and Socket.IO Scripts -->
+<script src="{% static 'js/socket.io.min.js' %}"></script>
+<script>
+    // Room and user data
+    const roomId = '{{ room.id }}';
+    const roomName = '{{ room.name }}';
+    const username = '{{ user.username }}';
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socketUrl = `${wsProtocol}//${window.location.host}/ws/room/${roomId}/`;
+    
+    // WebRTC configuration
+    const iceServers = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+    };
+    
+    // Global variables
+    let localStream = null;
+    let socket = null;
+    let peers = {};
+    let isVideoEnabled = true;
+    let isAudioEnabled = true;
+    let isScreenSharing = false;
+    
+    // Initialize the application when page loads
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    
+    async function initializeApp() {
+        try {
+            await initializeMedia();
+            initializeSocket();
+            initializeEventListeners();
+            updateParticipantCount();
+        } catch (error) {
+            console.error('Failed to initialize app:', error);
+            alert('Failed to access camera and microphone. Please check your permissions.');
+        }
+    }
+    
+    async function initializeMedia() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 1280, height: 720 },
+                audio: { echoCancellation: true, noiseSuppression: true }
+            });
+            
+            const localVideo = document.getElementById('local-video');
+            localVideo.srcObject = localStream;
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+            throw error;
+        }
+    }
+    
+    function initializeSocket() {
+        socket = io(socketUrl);
+        
+        socket.on('connect', () => {
+            console.log('Connected to room');
+            socket.emit('join_room', {
+                room_id: roomId,
+                username: username
+            });
+        });
+        
+        socket.on('user_joined', handleUserJoined);
+        socket.on('user_left', handleUserLeft);
+        socket.on('offer', handleOffer);
+        socket.on('answer', handleAnswer);
+        socket.on('ice_candidate', handleIceCandidate);
+        socket.on('chat_message', handleChatMessage);
+        socket.on('participant_count', updateParticipantCount);
+    }
+    
+    function initializeEventListeners() {
+        // Control buttons
+        document.getElementById('toggle-video').addEventListener('click', toggleVideo);
+        document.getElementById('toggle-audio').addEventListener('click', toggleAudio);
+        document.getElementById('share-screen').addEventListener('click', toggleScreenShare);
+        document.getElementById('toggle-chat').addEventListener('click', toggleChat);
+        document.getElementById('settings').addEventListener('click', openSettings);
+        document.getElementById('leave-room').addEventListener('click', leaveRoom);
+        document.getElementById('copy-room-id').addEventListener('click', copyRoomId);
+        
+        // Chat functionality
+        document.getElementById('send-message').addEventListener('click', sendMessage);
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        document.getElementById('close-chat').addEventListener('click', toggleChat);
+        
+        // Settings modal
+        document.getElementById('close-settings').addEventListener('click', closeSettings);
+        document.getElementById('save-settings').addEventListener('click', saveSettings);
+        document.getElementById('cancel-settings').addEventListener('click', closeSettings);
+        
+        // Prevent page reload on browser refresh
+        window.addEventListener('beforeunload', () => {
+            if (socket) {
+                socket.emit('leave_room', { room_id: roomId, username: username });
+            }
+        });
+    }
+    
+    // Placeholder functions - implement these based on your WebRTC logic
+    function handleUserJoined(data) {
+        console.log('User joined:', data);
+        // Create peer connection and add to video grid
+    }
+    
+    function handleUserLeft(data) {
+        console.log('User left:', data);
+        // Remove peer connection and video element
+    }
+    
+    function handleOffer(data) {
+        console.log('Received offer:', data);
+        // Handle WebRTC offer
+    }
+    
+    function handleAnswer(data) {
+        console.log('Received answer:', data);
+        // Handle WebRTC answer
+    }
+    
+    function handleIceCandidate(data) {
+        console.log('Received ICE candidate:', data);
+        // Handle ICE candidate
+    }
+    
+    function handleChatMessage(data) {
+        console.log('Chat message:', data);
+        addMessageToChat(data.username, data.message, data.timestamp);
+    }
+    
+    function toggleVideo() {
+        isVideoEnabled = !isVideoEnabled;
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            videoTrack.enabled = isVideoEnabled;
+        }
+        
+        const btn = document.getElementById('toggle-video');
+        const icon = btn.querySelector('i');
+        
+        if (isVideoEnabled) {
+            btn.classList.add('active');
+            icon.className = 'fas fa-video';
+        } else {
+            btn.classList.remove('active');
+            icon.className = 'fas fa-video-slash';
+        }
+    }
+    
+    function toggleAudio() {
+        isAudioEnabled = !isAudioEnabled;
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = isAudioEnabled;
+        }
+        
+        const btn = document.getElementById('toggle-audio');
+        const icon = btn.querySelector('i');
+        
+        if (isAudioEnabled) {
+            btn.classList.add('active');
+            icon.className = 'fas fa-microphone';
+        } else {
+            btn.classList.remove('active');
+            icon.className = 'fas fa-microphone-slash';
+        }
+    }
+    
+    async function toggleScreenShare() {
+        // Implement screen sharing logic
+        console.log('Toggle screen share');
+    }
+    
+    function toggleChat() {
+        const chatPanel = document.getElementById('chat-panel');
+        chatPanel.classList.toggle('active');
+    }
+    
+    function openSettings() {
+        const modal = document.getElementById('settings-modal');
+        modal.style.display = 'flex';
+    }
+    
+    function closeSettings() {
+        const modal = document.getElementById('settings-modal');
+        modal.style.display = 'none';
+    }
+    
+    function saveSettings() {
+        // Implement settings save logic
+        console.log('Save settings');
+        closeSettings();
+    }
+    
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        
+        if (message && socket) {
+            socket.emit('chat_message', {
+                room_id: roomId,
+                username: username,
+                message: message
+            });
+            input.value = '';
+        }
+    }
+    
+    function addMessageToChat(username, message, timestamp) {
+        const chatMessages = document.getElementById('chat-messages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'chat-message';
+        
+        const time = new Date(timestamp).toLocaleTimeString();
+        messageElement.innerHTML = `
+            <div class="message-header">
+                <span class="username">${username}</span>
+                <span class="timestamp">${time}</span>
+            </div>
+            <div class="message-content">${message}</div>
+        `;
+        
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function updateParticipantCount(count = 1) {
+        const element = document.getElementById('participant-count');
+        element.textContent = `${count} participant${count !== 1 ? 's' : ''}`;
+    }
+    
+    function copyRoomId() {
+        navigator.clipboard.writeText(roomId).then(() => {
+            // Show temporary success message
+            const btn = document.getElementById('copy-room-id');
+            const originalTitle = btn.title;
+            btn.title = 'Copied!';
+            setTimeout(() => {
+                btn.title = originalTitle;
+            }, 2000);
+        });
+    }
+    
+    function leaveRoom() {
+        if (confirm('Are you sure you want to leave the room?')) {
+            if (socket) {
+                socket.emit('leave_room', { room_id: roomId, username: username });
+            }
+            
+            // Stop all media tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Redirect to home or room list
+            window.location.href = '{% url "videocall:room_list" %}';
+        }
+    }
+</script>
+
+<style>
+    .video-call-container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #1a1a1a;
+        color: white;
+        position: relative;
+    }
+    
+    .call-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: #2d2d2d;
+        border-bottom: 1px solid #444;
+    }
+    
+    .room-info h2 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    
+    .room-type {
+        background: #007bff;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-left: 1rem;
+    }
+    
+    #participant-count {
+        color: #aaa;
+        margin-left: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .room-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .room-controls button {
+        background: #444;
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .room-controls button:hover {
+        background: #555;
+    }
+    
+    .leave-btn {
+        background: #dc3545 !important;
+    }
+    
+    .leave-btn:hover {
+        background: #c82333 !important;
+    }
+    
+    .video-grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    
+    .video-container {
+        position: relative;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 16/9;
+    }
+    
+    .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .video-controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .username {
+        font-weight: bold;
+        color: white;
+    }
+    
+    .call-controls {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #2d2d2d;
+        border-top: 1px solid #444;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background: #444;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .control-btn:hover {
+        background: #555;
+        transform: scale(1.1);
+    }
+    
+    .control-btn.active {
+        background: #007bff;
+    }
+    
+    .control-btn.active:hover {
+        background: #0056b3;
+    }
+    
+    .chat-panel {
+        position: fixed;
+        right: -400px;
+        top: 0;
+        width: 400px;
+        height: 100vh;
+        background: #2d2d2d;
+        transition: right 0.3s;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #444;
+        z-index: 1000;
+    }
+    
+    .chat-panel.active {
+        right: 0;
+    }
+    
+    .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #444;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+    
+    .chat-message {
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #3d3d3d;
+        border-radius: 4px;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timestamp {
+        color: #aaa;
+    }
+    
+    .chat-input {
+        display: flex;
+        padding: 1rem;
+        border-top: 1px solid #444;
+    }
+    
+    .chat-input input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #444;
+        background: #3d3d3d;
+        color: white;
+        border-radius: 4px 0 0 4px;
+    }
+    
+    .chat-input button {
+        padding: 0.5rem 1rem;
+        background: #007bff;
+        border: none;
+        color: white;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+    
+    .settings-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+    
+    .modal-content {
+        background: #2d2d2d;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #444;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .setting-group {
+        margin-bottom: 1rem;
+    }
+    
+    .setting-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+    
+    .setting-group select,
+    .setting-group input[type="text"] {
+        width: 100%;
+        padding: 0.5rem;
+        background: #3d3d3d;
+        border: 1px solid #444;
+        color: white;
+        border-radius: 4px;
+    }
+    
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid #444;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .call-header {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .video-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .chat-panel {
+            width: 100%;
+            right: -100%;
+        }
+        
+        .control-btn {
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+{% endblock %}

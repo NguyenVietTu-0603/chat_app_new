@@ -179,28 +179,81 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         }))
 class VideoCallConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_group_name = f"video_call_{self.scope['url_route']['kwargs']['username']}"
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = f'video_call_{self.room_name}'
+        
+        print(f"VideoCall connecting to room: {self.room_group_name}")
+        
+        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
+        
         await self.accept()
-    
+        
+        # Notify others that user joined
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'user_status',
+                'action': 'joined',
+                'user': getattr(self.scope.get('user'), 'username', 'Anonymous')
+            }
+        )
+        
+        print(f"VideoCall connected: {self.channel_name}")
+
     async def disconnect(self, close_code):
+        print(f"VideoCall disconnecting: {self.channel_name}")
+        
+        # Notify others that user left
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'user_status', 
+                'action': 'left',
+                'user': getattr(self.scope.get('user'), 'username', 'Anonymous')
+            }
+        )
+        
+        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
 
     async def receive(self, text_data):
-        # For now, just echo back
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "video_call_message",
-                "message": text_data,
-            }
-        )
+        try:
+            data = json.loads(text_data)
+            print(f"VideoCall received: {data.get('type', 'unknown')}")
+            
+            # Forward signaling messages to all room members
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'signaling_message',
+                    'data': data,
+                    'sender': self.channel_name
+                }
+            )
+        except json.JSONDecodeError as e:
+            print(f"VideoCall JSON decode error: {e}")
+        except Exception as e:
+            print(f"VideoCall receive error: {e}")
 
-    async def video_call_message(self, event):
-        await self.send(text_data=event["message"])
+    async def signaling_message(self, event):
+        data = event['data']
+        sender = event['sender']
+        
+        # Don't send message back to sender
+        if sender != self.channel_name:
+            await self.send(text_data=json.dumps(data))
+
+    async def user_status(self, event):
+        # Send user status to frontend
+        await self.send(text_data=json.dumps({
+            'type': f"user-{event['action']}",
+            'user': event['user']
+        }))
+        

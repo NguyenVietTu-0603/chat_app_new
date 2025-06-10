@@ -35,7 +35,7 @@
                     {% with chat.messages.first as last_message %}
                     {% comment %} <a href="{% url 'private_chat_room' other_user.username %}" class="c"
                         style="text-decoration: none;"> {% endcomment %}
-                        <div class="person c">
+                        <div class="person c" data-username="{{ other_user.username }}">
                             <div class="box">
                                 <div class="image">
                                     <img src="{{ other_user.profile.avatar }}" width="50px" height="50px"
@@ -210,6 +210,26 @@
 </div>
 
 <script>
+    
+    // Thêm event listener cho tất cả các phần tử có class "person c"
+    document.addEventListener('DOMContentLoaded', function() {
+        const personElements = document.querySelectorAll('.person.c');
+        
+        personElements.forEach(function(element) {
+            element.addEventListener('click', function() {
+                // Lấy username từ data attribute hoặc từ phần tử con
+                const username = this.getAttribute('data-username');
+                
+                if (username) {
+                    // Chuyển hướng đến trang chat
+                    window.location.href = `/private-chat/${username}/`; // Thay đổi URL theo route của bạn
+                }
+            });
+            
+            // Thêm cursor pointer để hiển thị rằng element có thể click
+            element.style.cursor = 'pointer';
+        });
+    });
     document.addEventListener("DOMContentLoaded", function () {
         const chatBox = document.querySelector(".messages");
         const messageInput = document.getElementById("message-input");
@@ -355,37 +375,61 @@
                 console.log("alo");
                 content = `<!-- Div thông báo cuộc gọi -->
                             <div id="incomingCall" style="
-                            position: fixed;
-                            top: 0; left: 0;
-                            width: 100vw;
-                            height: 100vh;
-                            background-color: rgba(0, 0, 0, 0.6);
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            z-index: 9999;
-                            ">
-                            <div style="
-                                background: white;
-                                padding: 30px;
-                                border-radius: 16px;
-                                text-align: center;
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                            ">
-                                <h2>📞 Có cuộc gọi đến từ <span id="callerName">user1</span></h2>
-                                <div style="margin-top: 20px;">
-                                <a class="text btn btn-success" 
-                                    href="/chat/video-call/${username}/?user=${username}&other=${otherUsername}&initiator=true"
-                                    style="margin-right: 15px; padding: 10px 20px; background-color: #28a745; color: white; border-radius: 5px; text-decoration: none;">
-                                    📞 Nhận cuộc gọi
-                                </a>
-                                <button onclick="document.getElementById('incomingCall').style.display='none'"
-                                        style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px;">
-                                    ❌ Từ chối
-                                </button>
-                                </div>
-                            </div>
-                            </div>
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-family: 'Segoe UI', sans-serif;
+">
+    <div style="
+        background: #fff;
+        padding: 24px 32px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 360px;
+    ">
+        <img src="{{ other_user.profile.avatar}}" alt="Call Icon" style="width: 60px; margin-bottom: 16px; border-radius: 50%;" />
+        <h3 style="margin: 0; font-size: 20px; color: #1d1d1f;">Cuộc gọi đến</h3>
+        <p style="margin-top: 8px; font-size: 16px; color: #555;">
+            Từ <span id="callerName" style="font-weight: 600; color: #1877f2;">{{ other_user.profile.realname }}</span>
+        </p>
+        <div style="display: flex; justify-content: space-around; margin-top: 24px;">
+            <button onclick="window.location.href='/chat/video-call/${otherUsername}/?user=${username}&other=${otherUsername}&initiator=true'" style="
+                background-color: #42b72a;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 56px;
+                height: 56px;
+                font-size: 20px;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            ">
+                ✅
+            </button>
+            <button onclick="document.getElementById('incomingCall').style.display='none'" style="
+                background-color: #f02849;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 56px;
+                height: 56px;
+                font-size: 20px;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            ">
+                ❌
+            </button>
+        </div>
+    </div>
+</div>
+
                             `;
                 messageText = `[Cuộc gọi đến từ ${otherUsername}]`;
             }

@@ -123,26 +123,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .control-btn:hover {
             transform: scale(1.1);
-        }
-
-        .btn-mute {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-mute.muted {
-            background: #ff4757;
-        }
-
-        .btn-camera {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-camera.off {
-            background: #ff4757;
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .btn-end {
@@ -151,14 +137,6 @@
 
         .btn-end:hover {
             background: #ff3742;
-        }
-
-        .btn-chat {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-share {
-            background: rgba(255, 255, 255, 0.2);
         }
 
         .connection-status {
@@ -199,27 +177,6 @@
             51%, 100% { opacity: 0.3; }
         }
 
-        .no-video-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            z-index: 5;
-        }
-
-        .no-video-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .no-video-text {
-            font-size: 18px;
-            opacity: 0.7;
-        }
-
         .chat-sidebar {
             position: absolute;
             right: -350px;
@@ -228,10 +185,11 @@
             height: 100vh;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            transition: right 0.3s ease;
+            transition: right 0.5s ease;
             z-index: 30;
             display: flex;
             flex-direction: column;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
         }
 
         .chat-sidebar.open {
@@ -242,7 +200,7 @@
             padding: 20px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -274,6 +232,11 @@
             border: none;
             border-radius: 20px;
             cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .chat-send-btn:hover {
+            background: #5568d9;
         }
 
         .loading-overlay {
@@ -293,10 +256,10 @@
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid white;
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -336,9 +299,9 @@
         <!-- Call header -->
         <div class="call-header">
             <div class="caller-info">
-                <img src="https://via.placeholder.com/50" alt="Avatar" class="caller-avatar" id="callerAvatar">
+                <img src="{{ other_user.profile.avatar }}" alt="Avatar" class="caller-avatar" id="">
                 <div>
-                    <div class="caller-name" id="callerName">John Doe</div>
+                    <div class="caller-name" id="">{{ other_user.profile.realname }}</div>
                     <div class="call-status" id="callStatus">Đang kết nối...</div>
                 </div>
             </div>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,7 +12,13 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap"
         rel="stylesheet">
+        <script>
+    const username = "{{ request.user.username }}"; // Truyền giá trị từ Django
+</script>
+        <script src="{% static 'js/base.js' %}"></script>
 </head>
+
+
 
 <body>
     {% include "includes/header.html" %}
@@ -26,4 +33,7 @@
     {% endblock layout %}
 </body>
 
+
+
 </html>
+

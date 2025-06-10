@@ -11,7 +11,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .forms import *
 from django.db.models import Q
-from .models import Profile,  FriendList, FriendRequest, BlockedUser
+from .models import Profile, FriendList, FriendRequest, BlockedUser
+from a_post.models import Post  # Giả sử model bài viết tên là Post và app là a_posts
 
 @login_required(login_url='/accounts/login/')
 def profile_page(request):
@@ -21,7 +22,24 @@ def profile_page(request):
     if not profile.realname or not profile.avatar:
         return redirect('profile-edit')
     else:
-        return render(request, 'a_users/profile.html', {'profile': profile})
+        # Lấy danh sách bài viết của user
+        posts = Post.objects.filter(author=user).order_by('-created')  # Sửa lại theo model của bạn
+        # Đếm số lượng bạn bè
+        try:
+            friend_list = FriendList.objects.get(user=user)
+            friend_count = friend_list.friends.count()
+        except FriendList.DoesNotExist:
+            friend_count = 0
+
+        return render(
+            request,
+            'a_users/profile.html',
+            {
+                'profile': profile,
+                'posts': posts,
+                'friend_count': friend_count,
+            }
+        )
 
 @login_required(login_url='/accounts/login/')
 def profile_edit_page(request):
@@ -381,14 +399,17 @@ def user_profile(request, user_id):
     is_blocked = False
     request_sent = False
     friendship_status = None
-    
+
+    # Lấy danh sách bài viết của user này
+    posts = Post.objects.filter(author=user).order_by('-created')
+
     # Kiểm tra xem có phải bạn bè không
     try:
         friend_list = FriendList.objects.get(user=request.user)
         is_friend = user in friend_list.friends.all()
     except FriendList.DoesNotExist:
         pass
-    
+
     # Kiểm tra xem có lời mời kết bạn đang chờ không
     request_received = FriendRequest.objects.filter(
         sender=user,
@@ -429,6 +450,7 @@ def user_profile(request, user_id):
         'request_sent': request_sent,
         'is_blocked': is_blocked,
         'friendship_status': friendship_status,
+        'posts': posts,  # <-- Thêm dòng này để truyền danh sách bài viết
     }
     
     return render(request, 'a_users/user_profile.html', context)
